@@ -1,4 +1,4 @@
-function [x,fval,exitflag,output] = fminsearchbnd(fun,x0,LB,UB,options,varargin)
+function [x,fval,exitflag,output]=fminsearchbnd3(fun,x0,LB,UB,options,varargin)
 % FMINSEARCHBND: FMINSEARCH, but with bound constraints by transformation
 % usage: x=FMINSEARCHBND(fun,x0)
 % usage: x=FMINSEARCHBND(fun,x0,LB)
@@ -109,9 +109,6 @@ params.LB = LB;
 params.UB = UB;
 params.fun = fun;
 params.n = n;
-% note that the number of parameters may actually vary if 
-% a user has chosen to fix one or more parameters
-params.xsize = xsize;
 params.OutputFcn = [];
 
 % 0 --> unconstrained variable
@@ -209,7 +206,7 @@ if isempty(x0u)
   exitflag = 0;
   
   output.iterations = 0;
-  output.funcCount = 1;
+  output.funcount = 1;
   output.algorithm = 'fminsearch';
   output.message = 'All variables were held fixed by the applied bounds';
   
@@ -231,7 +228,7 @@ end
 % undo the variable transformations into the original space
 x = xtransform(xu,params);
 
-% final reshape to make sure the result has the proper shape
+% final reshape
 x = reshape(x,xsize);
 
 % Use a nested function as the OutputFcn wrapper
@@ -256,7 +253,7 @@ function fval = intrafun(x,params)
 xtrans = xtransform(x,params);
 
 % and call fun
-fval = feval(params.fun,reshape(xtrans,params.xsize),params.args{:});
+fval = feval(params.fun,xtrans,params.args{:});
 
 end % sub function intrafun end
 
@@ -264,7 +261,7 @@ end % sub function intrafun end
 function xtrans = xtransform(x,params)
 % converts unconstrained variables into their original domains
 
-xtrans = zeros(params.xsize);
+xtrans = zeros(1,params.n);
 % k allows some variables to be fixed, thus dropped from the
 % optimization.
 k=1;

@@ -1,5 +1,5 @@
 function [lambda,fit_parameters,r_squared,y_fit]= ...
-    fit_sine_wave(varargin)
+    fit_damped_sine_wave(varargin)
 % Functions fits damped sine wave
 
 params.x_data=[];
@@ -13,7 +13,7 @@ params=parse_pv_pairs(params,varargin);
 x_data=params.x_data;
 y_data=params.y_data;
 
-plot(y_data)
+% plot(y_data)
 % Some error checking
 no_of_points=length(x_data);
 if (length(y_data)~=no_of_points)
