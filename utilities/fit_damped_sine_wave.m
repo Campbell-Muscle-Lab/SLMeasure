@@ -23,8 +23,11 @@ end
 % Find first two peaks
 pd=find_peaks('x',x_data,'y',y_data, ...
     'min_x_index_spacing',params.min_x_index_spacing, ...
-    'min_rel_delta_y',0.1);
+    'min_rel_delta_y',0.05);
 
+[pks,locs] = findpeaks(y_data);
+
+pd.max_indices = locs;
 xd=x_data;
 
 % Initial guess
@@ -32,7 +35,7 @@ p(1)=0.01;
 p(2)=0.5*(max(y_data)-min(y_data));
 p(4)=NaN;
 peak_indices = x_data(pd.max_indices);
-if (numel(peak_indices>2))
+if numel(peak_indices)>2
     diff_peak_indices=diff(peak_indices);
     min_lambda = 0.5*median(diff_peak_indices);
     max_lambda = 1.25*median(diff_peak_indices);
