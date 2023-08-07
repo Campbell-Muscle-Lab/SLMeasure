@@ -43,5 +43,5 @@ end
 
 set(axis_handle,'YDir','Reverse');
 set(axis_handle,'Visible','off');
-
+set(findall(axis_handle, 'type', 'text'), 'visible', 'on')
 set(axis_handle,'Units',old_axis_units);

@@ -1,0 +1,72 @@
+{"0": {
+    "doc": "Help",
+    "title": "Help",
+    "content": "If you encounter problems, we recommend the following strategies: . | Take a step back, and make sure to thoroughly go over the tutorial. | If that doesn’t work, try the following: . | Verify your microscope calibration and compare SLMeasure results with conventional “ruler on screen” methods. | Verify that the loaded image is not compressed or altered. Compressed and altered images will be detrimental. As the analysis relies on the information stored in the images. | . | If that doesn’t work, submit an issue. | If you don’t hear back in 3 days, email Utku Gulbulak, PhD or email Ken Campbell, PhD. | . ",
+    "url": "/pages/help/help.html",
+    
+    "relUrl": "/pages/help/help.html"
+  },"1": {
+    "doc": "SLMeasure",
+    "title": "SLMeasure",
+    "content": "A simple MATLAB app to help measure sarcomere length using brightfield images of multicellular preparations. ",
+    "url": "/",
+    
+    "relUrl": "/"
+  },"2": {
+    "doc": "Installation",
+    "title": "Installation",
+    "content": " ",
+    "url": "/pages/installation/installation.html",
+    
+    "relUrl": "/pages/installation/installation.html"
+  },"3": {
+    "doc": "Installation",
+    "title": "Cloning SLMeasure",
+    "content": "This page instructs you on how to clone the SLMeasure repository. For cloning the SLMeasure repository, we recommend using the GitHub Desktop client. Clicking on any of the images on this page will open a larger version in a new browser window. Open GitHub Desktop and click the dropdown menu for repositories (shown in red rectangle in the below image). Click the “Add” dropdown menu (shown in red rectangle in the below image). Click the “Clone repository…” button (shown in red rectangle in the below image). Type “SLMeasure” into the repository search bar (shown in red rectangle in the below image). Click the Campbell-Muscle-Lab/SLMeasure repository, and describe where you would like the repository to be located on your local machine (both shown in red rectangles in the below image). ",
+    "url": "/pages/installation/installation.html#cloning-slmeasure",
+    
+    "relUrl": "/pages/installation/installation.html#cloning-slmeasure"
+  },"4": {
+    "doc": "Load measurement",
+    "title": "Load analysis",
+    "content": "This page provides simple instructions on how to load an existing measurement to SLMeasure. ",
+    "url": "/pages/tutorial/load_measurement/load_measurement.html#load-analysis",
+    
+    "relUrl": "/pages/tutorial/load_measurement/load_measurement.html#load-analysis"
+  },"5": {
+    "doc": "Load measurement",
+    "title": "Instructions",
+    "content": ". | Using the SLMeasure through the cloned repository . | Launch MATLAB and double-click SLMeasure.mlapp. It is located under &lt;repo&gt; folder. | The SLMeasure.mlapp file starts the MATLAB App Designer, then press F5 to start the application. | . | . After a few seconds, you should see a program window. This is the main SLMeasure program. (Clicking on any of the images on this page will open a larger version in a new browser window.) . Click the File button on the toolbar. The file button opens a dropdown menu, which is highlighted in the red rectangle in the image below. Click the Load Analysis button. This button brings up a Windows File Open Dialog. Locate and load the SLMeasure measurement file. To learn how to save a SLMeasure measurement, please follow the start new measurement tutorial. After a few seconds, the measurement is loaded to the interface. All the operations described in start new measurement tutorial are available upon loading. ",
+    "url": "/pages/tutorial/load_measurement/load_measurement.html#instructions",
+    
+    "relUrl": "/pages/tutorial/load_measurement/load_measurement.html#instructions"
+  },"6": {
+    "doc": "Load measurement",
+    "title": "Load measurement",
+    "content": " ",
+    "url": "/pages/tutorial/load_measurement/load_measurement.html",
+    
+    "relUrl": "/pages/tutorial/load_measurement/load_measurement.html"
+  },"7": {
+    "doc": "Start new measurement",
+    "title": "Start new measurement",
+    "content": "This page provides simple instructions on how to perform a new sarcomere length measurement with SLMeasure. ",
+    "url": "/pages/tutorial/start_new_measurement/start_new_measurement.html",
+    
+    "relUrl": "/pages/tutorial/start_new_measurement/start_new_measurement.html"
+  },"8": {
+    "doc": "Start new measurement",
+    "title": "Instructions",
+    "content": ". | Using the SLMeasure through the cloned repository . | Launch MATLAB and double-click SLMeasure.mlapp. It is located under &lt;repo&gt; folder. | The SLMeasure.mlapp file starts the MATLAB App Designer, then press F5 to start the application. | . | . After a few seconds, you should see a program window. Here is the SLMeasure interface (Clicking on any of the images on this page will open a larger version in a new browser window.). The interface is divided into two different panels. Their functionality is summarized as follows: . | Brightfield: This panel has multiple axes to show images and the intensity profiles. It is the initial processing before the calculation. | The image axes display the brightfield images. The images are loaded using the load image button above. The region of interest (ROI) box controls are placed above the image axes. The microscope calibration is required to convert pixels to length scales (um/px in this case). | The area enclosed by the ROI is displayed on the ROI axes. | Intensity profiles along the height of the ROI box are displayed on the Intensity Profiles axes. The intensity profile of the selected ROI row is highlighted. | The derivative of the selected trace is shown on the Derivative of the Intensity profile axes. The derivation is performed to remove systemic trends. | . | Sarcomere Length Calculation: This panel shows the outputs of proccessing the ROI with Fast-Fourier Transform (FFT) and Autocorrelation Function (ACF). | The resulting double-sided amplitude spectrum is given. The x-axis value of the first peak is highlighted on the axes. | The autocorrelation of the derivate of the profile is shown on the ACF axes. A damped sine function is fitted to the ACF, and the wavelength of the damped sine function is highlighted. | Sarcomere length for each ROI row is shown in the Sarcomere Length Along ROI axes. | The average sarcomere length values for each method is tabulated. | . | . The first step of the measurement with SLMeasure is to load an image file into the environment. The Load Image is located above the image axes, shown in red rectangle. Upon clicking the Load Image button, it opens a normal Windows File Open Dialog. Locate the folder which has the brightfield images on your computer. SLMeasure can work with PNG (Portable Network Graphics) and TIFF or TIF (Tag Image File Format) files. An image should now be displayed in the Brightfield panel (red rectangle). The loaded image is a permeabilized skeletal fiber. We expect to see a sarcomere length ranging from 2.5-2.7 um in this example. You can zoom into the area of interest using MATLAB’s zoom-in controls. Change the cursor mode using the zoom-in controls, shown in the red rectangle. This feature appears on the top right corner of the image axes. It is hidden, but it appears as you hover over the image . Conversion from pixels to micrometers(um) is crucial for the app’s functionality. Edit the Microscope Calibration (um/px) field, shown in red rectangle. In this tutorial, the microscope calibration constant is 0.211 um/px. Please note that the microscope calibration is unique to the experimental setup. Please use your experimental setup’s calibration constant. The next step is to draw an ROI box for measurement. Box controls are placed above the brightfield image axes, shown in red rectangle. After clicking the New Box button, the mouse cursor changes into a crosshair. Click on the image and expand the ROI to the desired size. You can always adjust the position of the ROI box by dragging it across the image. Make sure to place the box, where you can see “clear” striations. This is easy to accomplish using the skeletal preparation, whereas the cardiac preparations require a “closer” look. The newly generated box appears light green. The SLMeasure automatically processes the enclosed area in the ROI. Please note that all the empty axes and fields are populated now. You can visualize the processed traces and results from all the ROI boxes using the ROI row select spinner, shown in the red rectangle. The displayed trace belongs to the 7th row in the ROI box. The highlighted intensity trace and the resulting spectrum and ACF have the same color, burgundy. Measuring multiple regions over preparation and using the average sarcomere lengths is a good practice. Once you are completed with the current box, generate your next box as mentioned above. SLMeasure will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. The new box is processed, and the new values are added to the table. You can change the selected box using the Box Selection dropdown, shown in the black rectangle. Once you finish your measurement, click the File button on the toolbar (red rectangle) to save your measurement. The Save Measurement button opens the following file dialog box, which allows you to save SLMeasure measurement files in a unique .sl format. This file format can be loaded to SLMeasure to revisit the measurement. Name your file and click Save. Additionally, the sarcomere length table can be exported as an Excel file. Click the Export SL Table button. The button opens a file dialog box for the Excel file. Name your file and click Save. The exported Excel file has the same structure as the table. ",
+    "url": "/pages/tutorial/start_new_measurement/start_new_measurement.html#instructions",
+    
+    "relUrl": "/pages/tutorial/start_new_measurement/start_new_measurement.html#instructions"
+  },"9": {
+    "doc": "Tutorial",
+    "title": "Tutorial",
+    "content": "Users can start a new measurement and revisit their old measurements by loading them. ",
+    "url": "/pages/tutorial/tutorial.html",
+    
+    "relUrl": "/pages/tutorial/tutorial.html"
+  }
+}
