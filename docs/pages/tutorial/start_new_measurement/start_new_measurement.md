@@ -28,7 +28,7 @@ The interface is divided into two different panels. Their functionality is summa
     + The resulting double-sided amplitude spectrum is given. The x-axis value of the first peak is highlighted on the axes. 
     + The autocorrelation of the derivate of the profile is shown on the ACF axes. A damped sine function is fitted to the ACF, and the wavelength of the damped sine function is highlighted.
     + Sarcomere length for each ROI row is shown in the Sarcomere Length Along ROI axes.
-    + The average sarcomere length values for each method is tabulated.
+    + The median sarcomere length value for each ROI box for each method is tabulated.
 
 <a href="media/start_up_window.png" target="_blank">![Load file button](media/start_up_window.png)</a>
 
