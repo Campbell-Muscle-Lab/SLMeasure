@@ -31,51 +31,23 @@ pd.max_indices = locs;
 xd=x_data;
 
 % Initial guess
-p(1)=0.01;
-p(2)=0.5*(max(y_data)-min(y_data));
-p(4)=NaN;
-peak_indices = x_data(pd.max_indices);
-if numel(peak_indices)>2
-    diff_peak_indices=diff(peak_indices);
-    min_lambda = 0.5*median(diff_peak_indices);
-    max_lambda = 1.25*median(diff_peak_indices);
-    p(4)=median(diff_peak_indices);
-    p(3) = p(4) + p(4)/4 - peak_indices(1);
-    if ((p(3)<0)||(p(3)>p(4)))
-        p(3)=p(4)/2;
-    end
-else
-    lambda=NaN;
-    fit_parameters=NaN*ones(1,4);
-    r_squared=NaN;
-    y_fit=NaN;
-    return;
+p(1) = 0.2;
+p(2) = 1;
+p(3) = 0;
+if (length(pd.max_indices)>=2)
+    peak_diff = diff(pd.max_indices);
+    p(4) = median(peak_diff);
+else 
+    p(4) = 15;
 end
 
 p=p;
-lower_bounds=[0 0.25*(max(y_data)-min(y_data)) 0 min_lambda];
-upper_bounds=[1 0.75*(max(y_data)-min(y_data)) max_lambda max_lambda];
-
-draw_graph=0;
-if (draw_graph)
-of=gcf;
-end
-
-draw_graph2=0;
-if (draw_graph2)
-    of=gcf;
-    figure(13);
-    clf;
-    hold on;
-    fit=p(1)+p(2)*sin(2*pi*(x_data+p(3))./p(4));
-    plot(x_data,fit,'r-s');
-    plot(x_data,y_data,'bo');
-    figure(of);
-end
+lower_bounds=[0 0 -inf eps];
+upper_bounds=[inf inf inf inf];
 
 % Fit
 p=fminsearchbnd(@sine_wave_fit,p,lower_bounds,upper_bounds, ...
-    [],x_data,y_data,draw_graph);
+    [],x_data,y_data);
 
 fit=exp(-p(1)*x_data).*p(2).*sin(2*pi*(x_data+p(3))./p(4));
 
@@ -84,18 +56,12 @@ fit_parameters=p;
 r_squared=calculate_r_squared(y_data,fit);
 y_fit=fit;
 
-if (draw_graph)
-figure(of);
 end
 
 
-function error = sine_wave_fit(p,x,y,draw_graph)
+function error = sine_wave_fit(p,x,y)
 
 fit=exp(-p(1)*x).*p(2).*sin(2*pi*(x+p(3))./p(4));
 error=sum((fit-y).^2);
 
-if (draw_graph)
-figure(10);
-plot(x,y,'b-',x,fit,'r-');
-pause(0.2)
 end
