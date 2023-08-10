@@ -18,23 +18,22 @@ This page provides simple instructions on how to perform a new sarcomere length 
 After a few seconds, you should see a program window. Here is the SLMeasure interface (Clicking on any of the images on this page will open a larger version in a new browser window.).
 
 The interface is divided into two different panels. Their functionality is summarized as follows:
-+ Brightfield: This panel has multiple axes to show images and the intensity profiles. It is the initial processing before the calculation.
++ Brightfield: This panel has multiple axes to show images and intensity profiles. It is the initial processing before the calculation.
     + The image axes display the brightfield images. The images are loaded using the load image button above. The region of interest (ROI) box controls are placed above the image axes. **The microscope calibration is required to convert pixels to length scales (um/px in this case).**
     + The area enclosed by the ROI is displayed on the ROI axes.
     + Intensity profiles along the height of the ROI box are displayed on the Intensity Profiles axes. The intensity profile of the selected ROI row is highlighted.
     + The derivative of the selected trace is shown on the Derivative of the Intensity profile axes. The derivation is performed to remove systemic trends.
 
-+ Sarcomere Length Calculation: This panel shows the outputs of proccessing the ROI with [Fast-Fourier Transform (FFT)](https://en.wikipedia.org/wiki/Fast_Fourier_transform) and [Autocorrelation Function (ACF)](https://en.wikipedia.org/wiki/Autocorrelation).
-    + The resulting double-sided amplitude spectrum is given. The x-axis value of the first peak is highlighted on the axes. 
-    + The autocorrelation of the derivate of the profile is shown on the ACF axes. A damped sine function is fitted to the ACF, and the wavelength of the damped sine function is highlighted.
-    + Sarcomere length for each ROI row is shown in the Sarcomere Length Along ROI axes.
-    + The median sarcomere length value for each ROI box for each method is tabulated.
++ Sarcomere Length Calculation: This panel shows the outputs of processing the ROI with [Fast-Fourier Transform (FFT)](https://en.wikipedia.org/wiki/Fast_Fourier_transform) and [Autocorrelation Function (ACF)](https://en.wikipedia.org/wiki/Autocorrelation). SLMeasure calculates the FFT and ACF for each row in the ROI. Once all the rows are processed, the average of FFT amplitude spectrum is used to find the peak location. On the other hand, a damped sine function is fitted to the mean ACF.
+    + The x-axis value of the first peak is highlighted (with the star marker) on the FFT axes. 
+    + The R-squared and the wavelength of the damped sine function are highlighted on the ACF axes.
+    + The sarcomere length value from each ROI box for each method is tabulated.
 
 <a href="media/start_up_window.png" target="_blank">![Load file button](media/start_up_window.png)</a>
 
-The first step of the measurement with SLMeasure is to load an image file into the environment. The Load Image is located above the image axes, shown in red rectangle.
+The first step of the measurement with SLMeasure is to load an image file into the environment. The Load Image is located above the image axes, shown in the red rectangle.
 
-<a href="media/load_image.png" target="_blank">![Load image button](media/load_image.png)</a>
+<a href="media/load_image.png" target="_blank">![Load file button](media/load_image.png)</a>
 
 Upon clicking the Load Image button, it opens a normal Windows File Open Dialog. Locate the folder which has the brightfield images on your computer. SLMeasure can work with PNG (Portable Network Graphics) and TIFF or TIF (Tag Image File Format) files.
 
@@ -58,17 +57,27 @@ The next step is to draw an ROI box for measurement. Box controls are placed abo
 
 <a href="media/new_box.png" target="_blank">![new box](media/new_box.png)</a>
 
-After clicking the New Box button, the mouse cursor changes into a crosshair. Click on the image and expand the ROI to the desired size. You can always adjust the position of the ROI box by dragging it across the image. Make sure to place the box, where you can see "clear" striations. This is easy to accomplish using the skeletal preparation, whereas the cardiac preparations require a "closer" look. The newly generated box appears light green. The SLMeasure automatically processes the enclosed area in the ROI. Please note that all the empty axes and fields are populated now.
+After clicking the New Box button, the mouse cursor changes into a crosshair. Click on the image and expand the ROI to the desired size. You can always adjust the position of the ROI box by dragging it across the image. Make sure to place the box, where you can see "clear" striations. This is easy to accomplish using the skeletal preparation, whereas the cardiac preparations require a "closer" look. The newly generated box appears light green. 
+
+The SLMeasure automatically processes the enclosed area in the ROI. The intensity profiles for each row in the ROI are extracted. Please note that all the empty axes and fields are populated now.
 
 <a href="media/box_1.png" target="_blank">![box_1](media/box_1.png)</a>
 
-You can visualize the processed traces and results from all the ROI boxes using the ROI row select spinner, shown in the red rectangle. The displayed trace belongs to the 7th row in the ROI box. The highlighted intensity trace and the resulting spectrum and ACF have the same color, burgundy.
+You can visualize the processed traces and results from all the ROI boxes using the ROI row select spinner, shown in the red rectangle. The displayed trace belongs to the 7th row in the ROI box.
 
 <a href="media/change_row.png" target="_blank">![Change row](media/change_row.png)</a>
 
-Measuring multiple regions over preparation and using the average sarcomere lengths is a good practice. Once you are completed with the current box, generate your next box as mentioned above. SLMeasure will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. The new box is processed, and the new values are added to the table. You can change the selected box using the Box Selection dropdown, shown in the black rectangle.
+Measuring multiple regions over preparation and using the average sarcomere lengths is a good practice. Once you are completed with the current box, generate your next box as mentioned above. SLMeasure will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. The new box is processed, and the new values are added to the table. You can change the selected box using the Box Selection dropdown, shown in the red rectangle.
 
 <a href="media/box_2.png" target="_blank">![Box 2](media/box_2.png)</a>
+
+Dragging or resizing the new boxes is usually a good strategy for obtaining useful information. Yet, you can also use the Delete Box button, shown in the red rectangle, to remove an unwanted box. Click the delete button to remove Box 2.
+
+<a href="media/box_delete.png" target="_blank">![Box delete](media/box_delete.png)</a>
+
+The sarcomere lengths and the box labels are updated.
+
+<a href="media/deleted_box.png" target="_blank">![Deleted box](media/deleted_box.png)</a>
 
 Once you finish your measurement, click the File button on the toolbar (red rectangle) to save your measurement.
 
