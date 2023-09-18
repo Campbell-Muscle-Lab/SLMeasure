@@ -1,4 +1,4 @@
-function center_image_with_preserved_aspect_ratio(im,axis_handle)
+function [fig_handle] = center_image_with_preserved_aspect_ratio(im,axis_handle)
 
 if (nargin==1)
     axis_handle = gca;
@@ -18,7 +18,7 @@ axes_aspect_ratio=axes_x/axes_y;
 im_aspect_ratio=im_x/im_y;
 
 % Display the image
-imagesc(im,'Parent',axis_handle);
+fig_handle = imagesc(im,'Parent',axis_handle);
 
 if (axes_aspect_ratio>im_aspect_ratio)
     % We have to pad the image horizontally so that it has the same
