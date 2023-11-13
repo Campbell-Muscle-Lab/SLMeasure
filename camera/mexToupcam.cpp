@@ -334,7 +334,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         if (S_OK == Init(nRes, nSpeed, ID))
         {
             int srcW = 0, srcH = 0;
-            Toupcam_get_Resolution(g_hCam, 0, &srcW, &srcH);
+            Toupcam_get_Resolution(g_hCam, nRes, &srcW, &srcH);
             mwSize dims[2] = {srcW * 3, srcH};
             plhs[0] = mxCreateNumericArray(2, dims, mxUINT8_CLASS, mxREAL);
             g_imgData = static_cast<unsigned char*>(mxGetData(plhs[0]));
