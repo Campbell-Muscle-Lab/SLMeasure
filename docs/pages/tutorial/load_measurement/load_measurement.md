@@ -23,11 +23,11 @@ Click the File button on the toolbar. The file button opens a dropdown menu, whi
 
 <a href="media/load_measurement.png" target="_blank">![Load measurement button](media/load_measurement.png)</a>
 
-This button brings up a Windows File Open Dialog. Locate and load the SLMeasure measurement file. To learn how to save a SLMeasure measurement, please follow the [start new measurement tutorial](../start_new_measurement/start_new_measurement.html).
+This button brings up a Windows File Open Dialog. Locate and load the SLMeasure measurement file. To learn how to save a SLMeasure measurement, please follow the [start new measurement using brightfield images tutorial](../start_new_measurement_using_brightfield_images/start_new_measurement_using_brightfield_images.html).
 
 <a href="media/load_measurement_file.png" target="_blank">![Load measurement dialog](media/load_measurement_file.png)</a>
 
-After a few seconds, the measurement is loaded to the interface. All the operations described in [start new measurement tutorial](../start_new_measurement/start_new_measurement.html) are available upon loading.
+After a few seconds, the measurement is loaded to the interface. All the operations described in [start new measurement using brightfield images tutorial](../start_new_measurement_using_brightfield_images/start_new_measurement_using_brightfield_images.html) are available upon loading.
 
 <a href="media/loaded_measurement.png" target="_blank">![Loaded measurement](media/loaded_measurement.png)</a>
 

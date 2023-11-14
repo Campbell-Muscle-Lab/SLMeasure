@@ -2,43 +2,76 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        SLMeasureUIFigure           matlab.ui.Figure
-        FileMenu                    matlab.ui.container.Menu
-        SaveMeasurementMenu         matlab.ui.container.Menu
-        LoadMeasurementMenu         matlab.ui.container.Menu
-        CameraPanel                 matlab.ui.container.Panel
-        ResolutionPanel             matlab.ui.container.Panel
-        ResolutionDropDown          matlab.ui.control.DropDown
-        ColorAdjustmentPanel        matlab.ui.container.Panel
-        WhiteBalancePanel           matlab.ui.container.Panel
-        ExposurePanel               matlab.ui.container.Panel
-        SnapshotRecordPanel         matlab.ui.container.Panel
-        DeviceList                  matlab.ui.control.ListBox
-        DeviceListPanel             matlab.ui.container.Panel
-        StartLiveMeasurementButton  matlab.ui.control.StateButton
-        MicroscopeCalibrationumpxDropDown  matlab.ui.control.DropDown
-        MicroscopeCalibrationumpxDropDownLabel  matlab.ui.control.Label
-        DeleteBoxButton             matlab.ui.control.Button
-        BoxSelectionDropDown        matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel   matlab.ui.control.Label
-        NewBoxButton                matlab.ui.control.Button
-        LoadImageButton             matlab.ui.control.Button
+        SLMeasureUIFigure               matlab.ui.Figure
+        FileMenu                        matlab.ui.container.Menu
+        SaveMeasurementMenu             matlab.ui.container.Menu
+        LoadMeasurementMenu             matlab.ui.container.Menu
+        CameraPanel                     matlab.ui.container.Panel
+        ResolutionPanel                 matlab.ui.container.Panel
+        ResolutionDropDown              matlab.ui.control.DropDown
+        ColorAdjustmentPanel            matlab.ui.container.Panel
+        DefaultsButton                  matlab.ui.control.Button
+        GammaEditField                  matlab.ui.control.NumericEditField
+        GammaEditFieldLabel             matlab.ui.control.Label
+        GammaSlider                     matlab.ui.control.Slider
+        ContrastEditField               matlab.ui.control.NumericEditField
+        ContrastEditFieldLabel          matlab.ui.control.Label
+        ContrastSlider                  matlab.ui.control.Slider
+        BrightnessEditField             matlab.ui.control.NumericEditField
+        BrightnessEditFieldLabel        matlab.ui.control.Label
+        BrightnessSlider                matlab.ui.control.Slider
+        SaturationEditField             matlab.ui.control.NumericEditField
+        SaturationEditFieldLabel        matlab.ui.control.Label
+        SaturationSlider                matlab.ui.control.Slider
+        HueSlider                       matlab.ui.control.Slider
+        HueEditField                    matlab.ui.control.NumericEditField
+        HueEditFieldLabel               matlab.ui.control.Label
+        WhiteBalancePanel               matlab.ui.container.Panel
+        WBDefaultsButton                matlab.ui.control.Button
+        WhiteBalanceButton              matlab.ui.control.Button
+        TintSlider                      matlab.ui.control.Slider
+        TintEditField                   matlab.ui.control.NumericEditField
+        TintEditFieldLabel              matlab.ui.control.Label
+        ColorTempSlider                 matlab.ui.control.Slider
+        ColorTemperatureEditField       matlab.ui.control.NumericEditField
+        ColorTemperatureEditFieldLabel  matlab.ui.control.Label
+        ExposurePanel                   matlab.ui.container.Panel
+        ExposureSlider                  matlab.ui.control.Slider
+        ExposureTimemsEditField         matlab.ui.control.NumericEditField
+        ExposureTimemsEditFieldLabel    matlab.ui.control.Label
+        AutoExposureCheckBox            matlab.ui.control.CheckBox
+        SnapshotRecordPanel             matlab.ui.container.Panel
+        SaveImageButton                 matlab.ui.control.Button
+        DeviceList                      matlab.ui.control.ListBox
+        DeviceListPanel                 matlab.ui.container.Panel
+        LiveExperimentModeButton        matlab.ui.control.StateButton
+        LiveMeasurementModeButton       matlab.ui.control.StateButton
         SarcomereLengthCalculationPanel  matlab.ui.container.Panel
-        ExportSLTableButton         matlab.ui.control.Button
-        UITable                     matlab.ui.control.Table
-        ac_axis                     matlab.ui.control.UIAxes
-        fft_axis                    matlab.ui.control.UIAxes
-        BrightfieldPanel            matlab.ui.container.Panel
-        ROIRowSelectSpinner         matlab.ui.control.Spinner
-        ROIRowSelectSpinnerLabel    matlab.ui.control.Label
-        ROIWidthpxEditField         matlab.ui.control.NumericEditField
-        ROIWidthpxEditFieldLabel    matlab.ui.control.Label
-        ROIHeightpxEditField        matlab.ui.control.NumericEditField
-        ROIHeightpxEditFieldLabel   matlab.ui.control.Label
-        calculation_axis            matlab.ui.control.UIAxes
-        px_intensity                matlab.ui.control.UIAxes
-        inset_axis                  matlab.ui.control.UIAxes
-        image_axis                  matlab.ui.control.UIAxes
+        ExportSLTableButton             matlab.ui.control.Button
+        UITable                         matlab.ui.control.Table
+        exp_axis                        matlab.ui.control.UIAxes
+        ac_axis                         matlab.ui.control.UIAxes
+        fft_axis                        matlab.ui.control.UIAxes
+        BrightfieldPanel                matlab.ui.container.Panel
+        MicroscopeCalibrationDropDown   matlab.ui.control.DropDown
+        MicroscopeCalibrationDropDownLabel  matlab.ui.control.Label
+        BoxSelectionDropDown            matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel       matlab.ui.control.Label
+        NewBoxButton                    matlab.ui.control.Button
+        LoadImageButton                 matlab.ui.control.Button
+        ROIRowSelectSpinner             matlab.ui.control.Spinner
+        ROIRowSelectSpinnerLabel        matlab.ui.control.Label
+        ROIWidthpxEditField             matlab.ui.control.NumericEditField
+        ROIWidthpxEditFieldLabel        matlab.ui.control.Label
+        ROIHeightpxEditField            matlab.ui.control.NumericEditField
+        ROIHeightpxEditFieldLabel       matlab.ui.control.Label
+        CalibrationFilePathEditField    matlab.ui.control.EditField
+        CalibrationFilePathEditFieldLabel  matlab.ui.control.Label
+        LoadMicroscopeCalibrationFileButton  matlab.ui.control.Button
+        calculation_axis                matlab.ui.control.UIAxes
+        px_intensity                    matlab.ui.control.UIAxes
+        inset_axis                      matlab.ui.control.UIAxes
+        image_axis                      matlab.ui.control.UIAxes
     end
 
 
@@ -47,7 +80,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
     end
 
     properties (Access = public)
-        image_file % Description
+        image_file
         roi_pos
         roi_rec
         px_cal
@@ -66,9 +99,12 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         mean_P2
         live_image = []
         ToupcamData
-        Devices % Description
-        live_measurement = 0; % Description
-        boxes % Description
+        Devices
+        live_measurement = 0;
+        live_experiment = 0; 
+        boxes 
+        live_fig_handle 
+        time 
     end
 
     methods (Access = private)
@@ -113,13 +149,16 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             %                 end
             %             end
 
-            if app.live_measurement == 1
+            if app.live_measurement == 1 || ...
+                    (app.live_measurement == 2 && ...
+                    ~isfield(app.sl_data,'image_file_string'))
                 app.sl_data.image_file = [];
                 app.sl_data.image_file = app.live_image;
             end
+
             app.roi_box = imcrop(app.sl_data.image_file, ...
                 app.sl_data.box_handle(box_no).Position);
-            [fig_handle] = center_image_with_preserved_aspect_ratio( ...
+            [app.live_fig_handle] = center_image_with_preserved_aspect_ratio( ...
                 app.roi_box, ...
                 app.inset_axis);
 
@@ -146,36 +185,40 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.y_fit = [];
             app.r_squared = [];
 
+            if (ndims(app.roi_box)==3)
+                app.roi_box = rgb2gray(app.roi_box);
+            end
+
             for ct = 1 : size(app.roi_box,1)
                 app.profile(ct,:) = app.roi_box(ct,:);
                 app.sig(ct,:)  = (diff(app.profile(ct,:)));
-                %                 SLFFT(app,ct);
-                %                 SLAutoCorr(app,ct);
+                SLFFT(app,ct);
+                SLAutoCorr(app,ct);
             end
 
-            %             app.mean_X_acf = mean(app.X_acf,1);
-            %             app.mean_P2 = mean(app.P2,1);
-            %
-            %             [lambda,fit_parameters,app.r_squared,app.y_fit] = fit_damped_sine_wave('y_data',app.mean_X_acf,...
-            %                 'x_data',app.lags(1,:), 'min_x_index_spacing',5);
-            %             if app.px_cal ~=0
-            %                 app.sl_data.sarcomere_length_acf(box_no) = lambda * app.px_cal;
-            %                 app.wavelength = lambda;
-            %             else
-            %                 app.sl_data.sarcomere_length_acf(box_no) = 0;
-            %             end
-            %
-            %             [peaks, locs] = findpeaks(app.mean_P2);
-            %             [max_mag,max_ix] = max(peaks);
-            %             F_p = 0:numel(app.mean_P2)-1;
-            %             if app.px_cal ~=0
-            %                 app.sl_data.sarcomere_length_fft(box_no) = ...
-            %                     size(app.sig,2)*app.px_cal/F_p(locs(max_ix));
-            %             else
-            %                 app.sl_data.sarcomere_length_fft(box_no) = 0;
-            %             end
+            app.mean_X_acf = mean(app.X_acf,1);
+            app.mean_P2 = mean(app.P2,1);
 
-            %             UpdateDisplay(app)
+            [lambda,fit_parameters,app.r_squared,app.y_fit] = fit_damped_sine_wave('y_data',app.mean_X_acf,...
+                'x_data',app.lags(1,:), 'min_x_index_spacing',5);
+            if app.sl_data.calibration.px_cal ~=0
+                app.sl_data.sarcomere_length_acf(box_no) = lambda * app.sl_data.calibration.px_cal;
+                app.wavelength = lambda;
+            else
+                app.sl_data.sarcomere_length_acf(box_no) = 0;
+            end
+
+            [peaks, locs] = findpeaks(app.mean_P2);
+            [max_mag,max_ix] = max(peaks);
+            F_p = 0:numel(app.mean_P2)-1;
+            if app.sl_data.calibration.px_cal ~=0
+                app.sl_data.sarcomere_length_fft(box_no) = ...
+                    size(app.sig,2)*app.sl_data.calibration.px_cal/F_p(locs(max_ix));
+            else
+                app.sl_data.sarcomere_length_fft(box_no) = 0;
+            end
+
+            UpdateDisplay(app)
         end
 
         function SLAutoCorr(app,ct)
@@ -261,9 +304,70 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         end
 
 
-        function LiveROIFeed(app)
+
+        function LiveSarcomereLength(app,m)
+
+            app.sl_data.image_file = app.live_image;
 
 
+            for box_no = 1 : numel(app.sl_data.box_handle)
+                app.roi_box = [];
+
+                app.roi_box = imcrop(app.sl_data.image_file, ...
+                    app.sl_data.box_handle(box_no).Position);
+
+                app.profile = [];
+                app.sig = [];
+                sl_fft = [];
+                sl_acf = [];
+                app.P2 = [];
+                app.X_acf = [];
+                app.wavelength = [];
+                app.lags = [];
+                app.y_fit = [];
+                app.r_squared = [];
+
+                if (ndims(app.roi_box)==3)
+                    app.roi_box = rgb2gray(app.roi_box);
+                end
+
+                for ct = 1 : size(app.roi_box,1)
+                    app.profile(ct,:) = app.roi_box(ct,:);
+                    app.sig(ct,:)  = (diff(app.profile(ct,:)));
+                    SLFFT(app,ct);
+                    %                 SLAutoCorr(app,ct);
+                end
+
+                app.mean_X_acf = mean(app.X_acf,1);
+                app.mean_P2 = mean(app.P2,1);
+
+                [lambda,fit_parameters,app.r_squared,app.y_fit] = fit_damped_sine_wave('y_data',app.mean_X_acf,...
+                    'x_data',app.lags(1,:), 'min_x_index_spacing',5);
+                if app.sl_data.calibration.px_cal ~=0
+                    app.sl_data.live.sarcomere_length_acf(m,box_no) = lambda * app.sl_data.calibration.px_cal;
+                    app.wavelength = lambda;
+                else
+                    app.sl_data.live.sarcomere_length_acf(m,box_no) = 0;
+                end
+
+                [peaks, locs] = findpeaks(app.mean_P2);
+                [max_mag,max_ix] = max(peaks);
+                F_p = 0:numel(app.mean_P2)-1;
+                if app.sl_data.calibration.px_cal ~=0
+                    app.sl_data.live.sarcomere_length_fft(m,box_no) = ...
+                        size(app.sig,2)*app.sl_data.calibration.px_cal/F_p(locs(max_ix));
+                else
+                    app.sl_data.live.sarcomere_length_fft(m,box_no) = 0;
+                end
+                app.sl_data.live.sarcomere_length_fft(m,box_no) = 4 + rand(1,1);
+                app.sl_data.live.sarcomere_length_acf(m,box_no) = 2 + rand(1,1);
+            end
+            cm = parula(box_no);
+            hold(app.exp_axis,"on")
+            for i = 1:box_no
+                plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_fft(1:m,i),'Color',cm(i,:),"Marker","pentagram",'LineWidth',2)
+                plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_acf(1:m,i),'Color',cm(i,:),"Marker","o",'LineWidth',2)
+            end
         end
     end
 
@@ -301,9 +405,13 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
                 end
 
+                if numel(devList) == 1
+                    app.DeviceList.Value = app.DeviceList.Items;
+                end
+
             end
 
-            app.ResolutionDropDown.Value
+            app.ResolutionDropDown.Value;
 
 
         end
@@ -315,7 +423,15 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             [file_string,path_string] = uigetfile2(filterspec);
             if (path_string~=0)
                 ClearDisplay(app)
+                if isfield(app.sl_data,'calibration')
+                    temp_cal = app.sl_data.calibration;
+                else
+                    temp_cal = [];
+                end
                 app.sl_data = [];
+                if ~isempty(temp_cal)
+                    app.sl_data.calibration = temp_cal;
+                end
                 app.UITable.Data = [];
                 app.sl_data.image_file_string = fullfile(path_string,file_string);
                 im = imread(app.sl_data.image_file_string);
@@ -326,6 +442,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                     im, ...
                     app.image_axis);
                 app.sl_data.image_file = im;
+
             end
         end
 
@@ -360,7 +477,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 p(1)+p(3)+20,p(2)-30,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18,"Color",'k');
 
             app.roi_pos = get(app.roi_rec, 'Position');
-            app.px_cal = app.MicroscopeCalibrationumpxDropDown.Value;
+%             app.px_cal = app.MicroscopeCalibrationDropDown.Value;
 
             for i=1:n
                 control_strings{i}=sprintf('%.0f',i);
@@ -370,8 +487,8 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Value = control_strings{n};
 
             SarcomereLength(app)
-            app.boxes(n) = app.sl_data.box_handle(n);
-            %             UpdateTable(app);
+            %             app.boxes(n) = app.sl_data.box_handle(n);
+            UpdateTable(app);
             addlistener(app.sl_data.box_handle(n),"MovingROI",@(src,evt) UpdateSL(evt));
 
             function UpdateSL(evt)
@@ -388,9 +505,10 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         end
 
-        % Value changed function: MicroscopeCalibrationumpxDropDown
+        % Value changed function: MicroscopeCalibrationDropDown
         function MicroscopeCalibrationumpxEditFieldValueChanged(app, event)
-            app.px_cal = str2num(app.MicroscopeCalibrationumpxDropDown.Value);
+            app.sl_data.calibration.cal_ix = find(strcmp(app.MicroscopeCalibrationDropDown.Value,app.MicroscopeCalibrationDropDown.Items));
+            app.sl_data.calibration.px_cal = app.sl_data.calibration.table.Calibration(app.sl_data.calibration.cal_ix);
             cur_box = app.BoxSelectionDropDown.Value;
             if isfield(app.sl_data,'box_handle')
                 for i = 1 : numel(app.sl_data.box_handle)
@@ -458,11 +576,17 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             for i=1:numel(app.sl_data.box_handle)
                 app.sl_data.box_position(i,:) = app.sl_data.box_handle(i).Position;
             end
+            if isfield(app.sl_data,'image_file_string')
             save_data.image_file_string = app.sl_data.image_file_string;
+            end
             save_data.im_data = app.sl_data.image_file;
-            save_data.px_cal = app.px_cal;
             save_data.box_position = app.sl_data.box_position;
+            save_data.calibration = app.sl_data.calibration;
 
+            if isfield(app.sl_data,'live')
+                save_data.live.sarcomere_length_fft = app.sl_data.live.sarcomere_length_fft;
+                save_data.live.sarcomere_length_acf = app.sl_data.live.sarcomere_length_acf;
+            end
             if (path_string~=0)
                 save(fullfile(path_string,file_string),'save_data');
             end
@@ -486,13 +610,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 save_data = temp.save_data;
 
                 app.sl_data = [];
+                if isfield(save_data,'image_file_string')
                 app.sl_data.image_file_string = save_data.image_file_string;
-                app.sl_data.image_file = save_data.im_data;
-                app.px_cal = save_data.px_cal;
-                if app.px_cal == str2num(app.MicroscopeCalibrationumpxDropDown.Value)
-                    app.px_cal = str2num(app.MicroscopeCalibrationumpxDropDown.Value);
                 end
+                app.sl_data.image_file = save_data.im_data;
+                app.sl_data.calibration = save_data.calibration;
 
+                for i = 1 : size(app.sl_data.calibration.table,1)
+                    name = sprintf('Obj. %s: %.4f um/px',app.sl_data.calibration.table.Objective{i}, app.sl_data.calibration.table.Calibration(i));
+                    app.MicroscopeCalibrationDropDown.Items{i} = name; 
+                end
+                
+                app.CalibrationFilePathEditField.Value = app.sl_data.calibration.file_name;
+                app.MicroscopeCalibrationDropDown.Value = app.MicroscopeCalibrationDropDown.Items{app.sl_data.calibration.cal_ix};
+                
                 [fig_handle] = center_image_with_preserved_aspect_ratio( ...
                     app.sl_data.image_file, ...
                     app.image_axis);
@@ -529,6 +660,18 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                     UpdateDisplay(app)
                     UpdateTable(app);
                 end
+
+                if isfield(save_data,'live')
+                    app.sl_data.live.sarcomere_length_fft = save_data.live.sarcomere_length_fft;
+                    app.sl_data.live.sarcomere_length_acf = save_data.live.sarcomere_length_acf;
+                    cm = parula(numel(app.sl_data.box_handle));
+                    hold(app.exp_axis,"on")
+                    for i = 1:numel(app.sl_data.box_handle)
+                        m = numel(app.sl_data.live.sarcomere_length_fft(:,i));
+                        plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_fft(1:m,i),'Color',cm(i,:),"Marker","pentagram",'LineWidth',2)
+                        plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_acf(1:m,i),'Color',cm(i,:),"Marker","o",'LineWidth',2)
+                    end
+                end
             end
             function UpdateSL2(evt)
                 box_no = str2num(app.BoxSelectionDropDown.Value);
@@ -544,6 +687,26 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         end
 
+        % Button pushed function: 
+        % LoadMicroscopeCalibrationFileButton
+        function LoadMicroscopeCalibrationFileButtonPushed(app, event)
+            filterspec = {'*.xlsx;*.xls','All Excel Files'};
+            [file_string,path_string] = uigetfile2(filterspec);
+            if (path_string~=0)
+                app.sl_data.calibration = [];
+                app.sl_data.calibration.file_name = [];
+                app.sl_data.calibration.file_name = fullfile(path_string,file_string);
+                app.CalibrationFilePathEditField.Value = app.sl_data.calibration.file_name;
+                app.sl_data.calibration.table = readtable(app.sl_data.calibration.file_name,'Sheet','Summary');
+                for i = 1 : size(app.sl_data.calibration.table,1)
+                    name = sprintf('Obj. %s: %.4f um/px',app.sl_data.calibration.table.Objective{i}, app.sl_data.calibration.table.Calibration(i));
+                    app.MicroscopeCalibrationDropDown.Items{i} = name; 
+                end
+                app.sl_data.calibration.px_cal = app.sl_data.calibration.table.Calibration(1);
+                app.sl_data.calibration.cal_ix = 1;
+            end
+        end
+
         % Callback function
         function RSquaredThresholdEditFieldValueChanged(app, event)
             value = app.RSquaredThresholdEditField.Value;
@@ -555,183 +718,434 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         end
 
-        % Button pushed function: DeleteBoxButton
-        function DeleteBoxButtonPushed(app, event)
-            selected_box = str2num(app.BoxSelectionDropDown.Value);
-            control_strings = app.BoxSelectionDropDown.Items;
+        % Value changed function: LiveMeasurementModeButton
+        function LiveMeasurementModeButtonValueChanged(app, event)
 
-            delete(app.sl_data.box_handle(selected_box))
-            delete(app.sl_data.box_label(selected_box))
+            global bStop
+            value = app.LiveMeasurementModeButton.Value;
 
-            app.sl_data.box_handle(selected_box) = [];
-            app.sl_data.box_label(selected_box) = [];
+            if value
 
-            app.sl_data.sarcomere_length_fft(selected_box) = [];
-            app.sl_data.sarcomere_length_acf(selected_box) = [];
+                app.live_measurement = 1;
+                app.LoadImageButton.Enable = 'off';
+                selected_device = app.DeviceList.Value;
 
-            n = numel(control_strings) - 1;
-            control_strings = {};
-            for i=1:n
-                control_strings{i} = sprintf('%.0f',i);
-            end
+                resolution = app.ResolutionDropDown.Value;
 
-            app.BoxSelectionDropDown.Items = control_strings;
-            if selected_box == 1
-                app.BoxSelectionDropDown.Value = num2str(selected_box);
-            else
-                app.BoxSelectionDropDown.Value = num2str(selected_box-1);
-            end
-
-            new_selected_box = str2num(app.BoxSelectionDropDown.Value);
-
-            for i=1:n
-                delete(app.sl_data.box_label(i));
-                if (i~=new_selected_box)
-                    app.sl_data.box_handle(i).Color = [1 0 0];
-                    app.sl_data.box_handle(i).InteractionsAllowed = 'none';
-                else
-                    app.sl_data.box_handle(i).Color = [0 1 0];
-                    app.sl_data.box_handle(i).InteractionsAllowed = 'all';
+                switch resolution
+                    case '1024 x 822'
+                        nResolutionIndex = 1;
+                        width = 1024;
+                        height = 822;
+                    case '2048 x 1644'
+                        nResolutionIndex = 1;
+                        width = 2048;
+                        height = 1644;
+                    case '4096 x 3288'
+                        nResolutionIndex = 1;
+                        width = 4096;
+                        height = 3288;
                 end
-            end
 
-            app.sl_data.box_label = [];
-            for i = 1:n
-                p = app.sl_data.box_handle(i).Position;
-                app.sl_data.box_label(i) = text(app.image_axis, ...
-                    p(1)+p(3)+20,p(2)-30,sprintf('%.0f',i),'FontWeight',"bold","FontSize",18,"Color",'w');
+                bStop = 0;
+                app.DeviceList.Enable = 'off';
+                items = app.DeviceList.Items;
+                index = strcmp(selected_device,items);
+                nSpeed = 1;
+                devList = app.Devices;
+                [im, ~, ~, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
+                app.ExposureSlider.Enable = 'off';
+                app.ExposureTimemsEditField.Enable = 'off';
+                app.ExposureTimemsEditFieldLabel.Enable = 'off';
 
-                app.sl_data.old_width = p(3);
-                app.sl_data.old_height = p(4);
+                app.ColorTempSlider.Enable = 'on';
+                app.ColorTempSlider.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+                app.ColorTemperatureEditFieldLabel.Enable = 'on';
+                app.ColorTemperatureEditField.Enable = 'on';
+                app.ColorTemperatureEditField.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+
+                app.TintSlider.Enable = 'on';
+                app.TintSlider.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+                app.TintEditFieldLabel.Enable = 'on';
+                app.TintEditField.Enable = 'on';
+                app.TintEditField.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+
+                app.WhiteBalanceButton.Enable = 'on';
+                app.WBDefaultsButton.Enable = 'on';
+
+                app.HueSlider.Enable = 'on';
+                app.HueSlider.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+                app.HueEditField.Enable = 'on';
+                app.HueEditFieldLabel.Enable = 'on';
+                app.HueEditField.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+
+                app.SaturationSlider.Enable = 'on';
+                app.SaturationSlider.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+                app.SaturationEditField.Enable = 'on';
+                app.SaturationEditFieldLabel.Enable = 'on';
+                app.SaturationEditField.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+
+                app.BrightnessSlider.Enable = 'on';
+                app.BrightnessSlider.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+                app.BrightnessEditField.Enable = 'on';
+                app.BrightnessEditFieldLabel.Enable = 'on';
+                app.BrightnessEditField.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+
+                app.ContrastSlider.Enable = 'on';
+                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+                app.ContrastEditField.Enable = 'on';
+                app.ContrastEditFieldLabel.Enable = 'on';
+                app.ContrastEditField.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+
+                app.GammaSlider.Enable = 'on';
+                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+                app.GammaEditField.Enable = 'on';
+                app.GammaEditFieldLabel.Enable = 'on';
+                app.GammaEditField.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+
+                app.DefaultsButton.Enable = 'on';
+
+                app.live_image = zeros(height,width, 3);
+                m = 1;
+                while ~isequal(bStop,2)
+                    for i = 1 : height
+                        for j = 1 :width
+                            app.live_image(i,j,1) = im(3*(j-1)+3,i);
+                            app.live_image(i,j,2) = im(3*(j-1)+2,i);
+                            app.live_image(i,j,3) = im(3*(j-1)+1,i);
+                        end
+                    end
+                    app.live_image = uint8(app.live_image);
+                    if m == 1
+                        [app.live_fig_handle] = center_image_with_preserved_aspect_ratio( ...
+                            app.live_image, ...
+                            app.image_axis);
+                    else
+                        app.live_fig_handle.CData = app.live_image;
+                    end
+
+                    if (isfield(app.sl_data,'box_handle'))
+                        cla(app.px_intensity)
+                        cla(app.calculation_axis)
+                        cla(app.fft_axis)
+                        cla(app.ac_axis)
+                        SarcomereLength(app)
+                    end
+                    drawnow;
+                    if bStop==1
+                        uiwait;
+                    end
+                    m = m +1;
+                end
+            else
+                bStop = 2;
+                app.live_measurement = 2;
+                mexToupcam(0,0);
+                app.boxes = app.sl_data.box_handle;
+                clear im;
+                app.LoadImageButton.Enable = 'on';
+                app.DeviceList.Enable = 'on';
             end
-            cla(app.ac_axis)
-            cla(app.fft_axis)
-            SarcomereLength(app)
-            UpdateDisplay(app)
-            UpdateTable(app)
         end
 
-        % Value changed function: StartLiveMeasurementButton
-        function StartLiveMeasurementButtonValueChanged(app, event)
+        % Value changed function: LiveExperimentModeButton
+        function LiveExperimentModeButtonValueChanged(app, event)
+            value = app.LiveExperimentModeButton.Value;
             global bStop
-            app.live_measurement = 1;
-            value = app.StartLiveMeasurementButton.Value;
-            app.LoadImageButton.Enable = 'off';
-            selected_device = app.DeviceList.Value;
 
-            resolution = app.ResolutionDropDown.Value;
+            if value
 
-            switch resolution
-                case '1024 x 822'
-                    nResolutionIndex = 1;
-                    width = 1024;
-                    height = 822;
-                case '2048 x 1644'
-                    nResolutionIndex = 1;
-                    width = 2048;
-                    height = 1644;
-                case '4096 x 3288'
-                    nResolutionIndex = 1;
-                    width = 4096;
-                    height = 3288;
-            end
+                app.live_experiment = 1;
+                app.LoadImageButton.Enable = 'off';
+                selected_device = app.DeviceList.Value;
 
-            bStop = 0;
-            app.DeviceList.Enable = 'off';
-            items = app.DeviceList.Items;
-            index = strcmp(selected_device,items);
-            nSpeed = 1;
-            devList = app.Devices;
-            [im, ~, ~, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
-            app.live_image = zeros(height,width, 3);
-            m = 1;
-            while ~isequal(bStop,2)
-                for i = 1 : height
-                    for j = 1 :width
-                        app.live_image(i,j,1) = im(3*(j-1)+3,i);
-                        app.live_image(i,j,2) = im(3*(j-1)+2,i);
-                        app.live_image(i,j,3) = im(3*(j-1)+1,i);
+                resolution = app.ResolutionDropDown.Value;
+
+                switch resolution
+                    case '1024 x 822'
+                        nResolutionIndex = 1;
+                        width = 1024;
+                        height = 822;
+                    case '2048 x 1644'
+                        nResolutionIndex = 1;
+                        width = 2048;
+                        height = 1644;
+                    case '4096 x 3288'
+                        nResolutionIndex = 1;
+                        width = 4096;
+                        height = 3288;
+                end
+
+                bStop = 0;
+                app.DeviceList.Enable = 'off';
+                items = app.DeviceList.Items;
+                index = strcmp(selected_device,items);
+                nSpeed = 1;
+                devList = app.Devices;
+                [im, ~, ~, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
+                app.ExposureSlider.Enable = 'off';
+                app.ExposureTimemsEditField.Enable = 'off';
+                app.ExposureTimemsEditFieldLabel.Enable = 'off';
+
+                app.ColorTempSlider.Enable = 'on';
+                app.ColorTempSlider.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+                app.ColorTemperatureEditFieldLabel.Enable = 'on';
+                app.ColorTemperatureEditField.Enable = 'on';
+                app.ColorTemperatureEditField.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+
+                app.TintSlider.Enable = 'on';
+                app.TintSlider.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+                app.TintEditFieldLabel.Enable = 'on';
+                app.TintEditField.Enable = 'on';
+                app.TintEditField.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+
+                app.WhiteBalanceButton.Enable = 'on';
+                app.WBDefaultsButton.Enable = 'on';
+
+                app.HueSlider.Enable = 'on';
+                app.HueSlider.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+                app.HueEditField.Enable = 'on';
+                app.HueEditFieldLabel.Enable = 'on';
+                app.HueEditField.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+
+                app.SaturationSlider.Enable = 'on';
+                app.SaturationSlider.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+                app.SaturationEditField.Enable = 'on';
+                app.SaturationEditFieldLabel.Enable = 'on';
+                app.SaturationEditField.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+
+                app.BrightnessSlider.Enable = 'on';
+                app.BrightnessSlider.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+                app.BrightnessEditField.Enable = 'on';
+                app.BrightnessEditFieldLabel.Enable = 'on';
+                app.BrightnessEditField.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+
+                app.ContrastSlider.Enable = 'on';
+                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+                app.ContrastEditField.Enable = 'on';
+                app.ContrastEditFieldLabel.Enable = 'on';
+                app.ContrastEditField.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+
+                app.GammaSlider.Enable = 'on';
+                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+                app.GammaEditField.Enable = 'on';
+                app.GammaEditFieldLabel.Enable = 'on';
+                app.GammaEditField.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+
+                app.DefaultsButton.Enable = 'on';
+
+                app.live_image = zeros(height,width, 3);
+                m = 1;
+                while ~isequal(bStop,2)
+                    for i = 1 : height
+                        for j = 1 :width
+                            app.live_image(i,j,1) = im(3*(j-1)+3,i);
+                            app.live_image(i,j,2) = im(3*(j-1)+2,i);
+                            app.live_image(i,j,3) = im(3*(j-1)+1,i);
+                        end
                     end
+                    app.time(m) = datetime;
+                    app.live_image = uint8(app.live_image);
+                    app.live_fig_handle.CData = app.live_image;
+
+                    if (isfield(app.sl_data,'box_handle'))
+                        LiveSarcomereLength(app,m)
+                    end
+                    drawnow;
+                    if bStop==1
+                        uiwait;
+                    end
+                    m = m +1;
                 end
-                app.live_image = uint8(app.live_image);
-                if m == 1
-                [fig_handle] = center_image_with_preserved_aspect_ratio( ...
-                    app.live_image, ...
-                    app.image_axis);
-                else
-                    fig_handle.CData = app.live_image;
-                end
-%                 hold(app.image_axis,'on')
-
-%                 if (isfield(app.sl_data,'box_handle'))
-%                     for i=1:size(app.sl_data.box_handle,1)
-%                         app.sl_data.box_handle(i) = images.roi.Rectangle(app.image_axis, ...
-%                             'Position',app.sl_data.box_handle(i).Position);
-%                         control_strings{i} = sprintf('%.0f',i);
-%                         app.sl_data.box_handle(i).FaceAlpha = 0;
-%                         sel_box = str2num(app.BoxSelectionDropDown.Value);
-%                         if (i~=sel_box)
-%                             app.sl_data.box_handle(i).Color = [1 0 0];
-%                             app.sl_data.box_handle(i).InteractionsAllowed = 'none';
-%                         else
-%                             app.sl_data.box_handle(i).Color = [0 1 0];
-%                             app.sl_data.box_handle(i).InteractionsAllowed = 'all';
-%                         end
-%                         p = app.sl_data.box_handle(i).Position;
-%                         app.sl_data.box_label(i) = text(p(1)+p(3),p(2)-30,sprintf('%.0f',i), ...
-%                             'Parent',app.image_axis,'FontWeight',"bold","FontSize",18,"Color",'k');
-%                         app.sl_data.old_width = p(3);
-%                         app.sl_data.old_height = p(4);
-% 
-%                         addlistener(app.sl_data.box_handle(i),"MovingROI",@(src,evt) UpdateSL3(evt));
-%                         addlistener(app.sl_data.box_handle(i),"ROIMoved",@(src,evt) ResumeSL(evt));
-%                     end
-% 
-%                     box_no = str2num(app.BoxSelectionDropDown.Value);
-%                     app.ROIHeightpxEditField.Value = app.sl_data.box_handle(box_no).Position(3);
-%                     app.ROIWidthpxEditField.Value = app.sl_data.box_handle(box_no).Position(4);
-%                     cla(app.px_intensity)
-%                     cla(app.calculation_axis)
-%                     cla(app.fft_axis)
-%                     cla(app.ac_axis)
-%                     SarcomereLength(app)
-%                 end
-                drawnow;
-                if bStop==1
-                    uiwait;
-                end
-            m = m +1;
+            else
+                bStop = 2;
+                app.live_measurement = 2;
+                mexToupcam(0,0);
+                clear im;
+                app.LoadImageButton.Enable = 'on';
+                app.DeviceList.Enable = 'on';
             end
-
-            function UpdateSL3(evt)
-                uiwait(app.SLMeasureUIFigure);
-                box_no = str2num(app.BoxSelectionDropDown.Value);
-                app.ROIHeightpxEditField.Value = app.sl_data.box_handle(box_no).Position(3);
-                app.ROIWidthpxEditField.Value = app.sl_data.box_handle(box_no).Position(4);
-
-                cla(app.px_intensity)
-                cla(app.calculation_axis)
-                cla(app.fft_axis)
-                cla(app.ac_axis)
-                %                 bStop = 0;
-
-                SarcomereLength(app)
-                %                 UpdateTable(app);
-            end
-
-            function ResumeSL(evt)
-                %                 bStop = 0;
-                uiresume(app.SLMeasureUIFigure);
-            end
-            mexToupcam(0,0);
-            clear im;
         end
 
         % Close request function: SLMeasureUIFigure
         function SLMeasureUIFigureCloseRequest(app, event)
-            mexToupcam(0,0);
-            clear im;
+            %             mexToupcam(0,0);
+            %             clear im;
+            global bStop;
+            bStop = 2;
             delete(app)
+        end
+
+        % Button pushed function: SaveImageButton
+        function SaveImageButtonPushed(app, event)
+            [file_string,path_string] = uiputfile2( ...
+                {'*.png','PNG'},'Select file name for the image');
+
+            if (path_string~=0)
+                output_file = fullfile(path_string,file_string);
+                if isempty(app.image_file)
+                    imwrite(app.live_image,output_file);
+                else
+                    imwrite(app.image_file,output_file);
+                end
+            end
+        end
+
+        % Value changed function: AutoExposureCheckBox
+        function AutoExposureCheckBoxValueChanged(app, event)
+            value = app.AutoExposureCheckBox.Value;
+            global bStop;
+            bStop = 1;
+            [a,time] = mexToupcam(2,0);
+            time=roundn(time/1000,-2);
+            if a == 0 && value == 0
+                app.ExposureSlider.Enable = 'on';
+                app.ExposureTimemsEditFieldLabel.Enable = 'on';
+                app.ExposureTimemsEditField.Enable = 'on';
+                app.ExposureSlider.Value = time;
+                app.ExposureTimemsEditField.Value = time;
+            else
+                app.ExposureSlider.Enable = 'off';
+                app.ExposureTimemsEditFieldLabel.Enable = 'off';
+                app.ExposureTimemsEditField.Enable = 'off';
+            end
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: ExposureSlider
+        function ExposureSliderValueChanged(app, event)
+            value = app.ExposureSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.ExposureTimemsEditField.Enable = 'on';
+            app.ExposureTimemsEditFieldLabel.Enable = 'on';
+            app.ExposureTimemsEditField.Value = roundn(value,-2);
+            mexToupcam(3,value*1000);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: ColorTempSlider
+        function ColorTempSliderValueChanged(app, event)
+            value = app.ColorTempSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.ColorTemperatureEditField.Value = value;
+            mexToupcam(5,value)
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: TintSlider
+        function TintSliderValueChanged(app, event)
+            value = app.TintSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.TintEditField.Value = value;
+            mexToupcam(6,value)
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Button pushed function: WhiteBalanceButton
+        function WhiteBalanceButtonPushed(app, event)
+            global bStop;
+            bStop = 1;
+            [temp, tint] = mexToupcam(4,0);
+            app.ColorTemperatureEditField.Value = temp;
+            app.ColorTempSlider.Value = temp;
+            app.TintEditField.Value = tint;
+            app.TintSlider.Value = tint;
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Button pushed function: WBDefaultsButton
+        function WBDefaultsButtonPushed(app, event)
+            global bStop;
+            bStop = 1;
+            mexToupcam(12,0);
+            app.ColorTemperatureEditField.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+            app.ColorTempSlider.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
+            app.TintEditField.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+            app.TintSlider.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: HueSlider
+        function HueSliderValueChanged(app, event)
+            value = app.HueSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.HueEditField.Value = value;
+            mexToupcam(7,value);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: SaturationSlider
+        function SaturationSliderValueChanged(app, event)
+            value = app.SaturationSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.SaturationEditField.Value = value;
+            mexToupcam(8,val);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: BrightnessSlider
+        function BrightnessSliderValueChanged(app, event)
+            value = app.BrightnessSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.BrightnessEditField.Value = value;
+            mexToupcam(9,val);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: ContrastSlider
+        function ContrastSliderValueChanged(app, event)
+            value = app.ContrastSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.ContrastEditField.Value = value;
+            mexToupcam(10,val);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Value changed function: GammaSlider
+        function GammaSliderValueChanged(app, event)
+            value = app.GammaSlider.Value;
+            global bStop;
+            bStop = 1;
+            app.GammaEditField.Value = value;
+            mexToupcam(11,val);
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
+        end
+
+        % Button pushed function: DefaultsButton
+        function DefaultsButtonPushed(app, event)
+            global bStop;
+            bStop = 1;
+            mexToupcam(13,0);
+            app.HueEditField.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+            app.HueSlider.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
+            app.SaturationEditField.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+            app.SaturationSlider.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
+            app.BrightnessEditField.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+            app.BrightnessSlider.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
+            app.ContrastEditField.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+            app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
+            app.GammaEditField.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+            app.GammaSlider.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
+            bStop = 0;
+            uiresume(app.SLMeasureUIFigure);
         end
     end
 
@@ -743,7 +1157,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
             % Create SLMeasureUIFigure and hide until all components are created
             app.SLMeasureUIFigure = uifigure('Visible', 'off');
-            app.SLMeasureUIFigure.Position = [100 100 1811 863];
+            app.SLMeasureUIFigure.Position = [100 100 1797 922];
             app.SLMeasureUIFigure.Name = 'SLMeasure';
             app.SLMeasureUIFigure.CloseRequestFcn = createCallbackFcn(app, @SLMeasureUIFigureCloseRequest, true);
 
@@ -766,7 +1180,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             % Create BrightfieldPanel
             app.BrightfieldPanel = uipanel(app.SLMeasureUIFigure);
             app.BrightfieldPanel.Title = 'Brightfield Panel';
-            app.BrightfieldPanel.Position = [219 420 1567 388];
+            app.BrightfieldPanel.Position = [219 425 1567 492];
 
             % Create image_axis
             app.image_axis = uiaxes(app.BrightfieldPanel);
@@ -774,7 +1188,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.image_axis.XTick = [];
             app.image_axis.YTick = [];
             app.image_axis.Box = 'on';
-            app.image_axis.Position = [17 38 539 313];
+            app.image_axis.Position = [15 41 539 313];
 
             % Create inset_axis
             app.inset_axis = uiaxes(app.BrightfieldPanel);
@@ -782,7 +1196,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.inset_axis.XTick = [];
             app.inset_axis.YTick = [];
             app.inset_axis.Box = 'on';
-            app.inset_axis.Position = [561 172 325 179];
+            app.inset_axis.Position = [559 175 325 179];
 
             % Create px_intensity
             app.px_intensity = uiaxes(app.BrightfieldPanel);
@@ -791,7 +1205,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ylabel(app.px_intensity, 'Optical Intensity (A.U)')
             zlabel(app.px_intensity, 'Z')
             app.px_intensity.Box = 'on';
-            app.px_intensity.Position = [891 38 325 313];
+            app.px_intensity.Position = [889 41 325 313];
 
             % Create calculation_axis
             app.calculation_axis = uiaxes(app.BrightfieldPanel);
@@ -800,42 +1214,99 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ylabel(app.calculation_axis, 'd(profile)/dx')
             zlabel(app.calculation_axis, 'Z')
             app.calculation_axis.Box = 'on';
-            app.calculation_axis.Position = [1229 38 325 313];
+            app.calculation_axis.Position = [1227 41 325 313];
+
+            % Create LoadMicroscopeCalibrationFileButton
+            app.LoadMicroscopeCalibrationFileButton = uibutton(app.BrightfieldPanel, 'push');
+            app.LoadMicroscopeCalibrationFileButton.ButtonPushedFcn = createCallbackFcn(app, @LoadMicroscopeCalibrationFileButtonPushed, true);
+            app.LoadMicroscopeCalibrationFileButton.Position = [35 431 191 22];
+            app.LoadMicroscopeCalibrationFileButton.Text = 'Load Microscope Calibration File';
+
+            % Create CalibrationFilePathEditFieldLabel
+            app.CalibrationFilePathEditFieldLabel = uilabel(app.BrightfieldPanel);
+            app.CalibrationFilePathEditFieldLabel.HorizontalAlignment = 'right';
+            app.CalibrationFilePathEditFieldLabel.Position = [236 431 114 22];
+            app.CalibrationFilePathEditFieldLabel.Text = 'Calibration File Path';
+
+            % Create CalibrationFilePathEditField
+            app.CalibrationFilePathEditField = uieditfield(app.BrightfieldPanel, 'text');
+            app.CalibrationFilePathEditField.Editable = 'off';
+            app.CalibrationFilePathEditField.Position = [365 431 555 22];
 
             % Create ROIHeightpxEditFieldLabel
             app.ROIHeightpxEditFieldLabel = uilabel(app.BrightfieldPanel);
-            app.ROIHeightpxEditFieldLabel.Position = [626 136 89 22];
+            app.ROIHeightpxEditFieldLabel.Position = [625 141 89 22];
             app.ROIHeightpxEditFieldLabel.Text = 'ROI Height (px)';
 
             % Create ROIHeightpxEditField
             app.ROIHeightpxEditField = uieditfield(app.BrightfieldPanel, 'numeric');
-            app.ROIHeightpxEditField.Position = [721 136 100 22];
+            app.ROIHeightpxEditField.Position = [720 141 100 22];
 
             % Create ROIWidthpxEditFieldLabel
             app.ROIWidthpxEditFieldLabel = uilabel(app.BrightfieldPanel);
-            app.ROIWidthpxEditFieldLabel.Position = [626 96 85 22];
+            app.ROIWidthpxEditFieldLabel.Position = [625 101 85 22];
             app.ROIWidthpxEditFieldLabel.Text = 'ROI Width (px)';
 
             % Create ROIWidthpxEditField
             app.ROIWidthpxEditField = uieditfield(app.BrightfieldPanel, 'numeric');
-            app.ROIWidthpxEditField.Position = [721 96 100 22];
+            app.ROIWidthpxEditField.Position = [720 101 100 22];
 
             % Create ROIRowSelectSpinnerLabel
             app.ROIRowSelectSpinnerLabel = uilabel(app.BrightfieldPanel);
             app.ROIRowSelectSpinnerLabel.HorizontalAlignment = 'right';
-            app.ROIRowSelectSpinnerLabel.Position = [620 58 91 22];
+            app.ROIRowSelectSpinnerLabel.Position = [619 63 91 22];
             app.ROIRowSelectSpinnerLabel.Text = 'ROI Row Select';
 
             % Create ROIRowSelectSpinner
             app.ROIRowSelectSpinner = uispinner(app.BrightfieldPanel);
             app.ROIRowSelectSpinner.ValueChangedFcn = createCallbackFcn(app, @ROIRowSelectSpinnerValueChanged, true);
-            app.ROIRowSelectSpinner.Position = [726 54 100 26];
+            app.ROIRowSelectSpinner.Position = [725 59 100 26];
             app.ROIRowSelectSpinner.Value = 1;
+
+            % Create LoadImageButton
+            app.LoadImageButton = uibutton(app.BrightfieldPanel, 'push');
+            app.LoadImageButton.ButtonPushedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
+            app.LoadImageButton.Position = [35 383 100 23];
+            app.LoadImageButton.Text = 'Load Image';
+
+            % Create NewBoxButton
+            app.NewBoxButton = uibutton(app.BrightfieldPanel, 'push');
+            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
+            app.NewBoxButton.Position = [149 383 82 23];
+            app.NewBoxButton.Text = 'New Box';
+
+            % Create BoxSelectionDropDownLabel
+            app.BoxSelectionDropDownLabel = uilabel(app.BrightfieldPanel);
+            app.BoxSelectionDropDownLabel.HorizontalAlignment = 'right';
+            app.BoxSelectionDropDownLabel.Position = [241 383 79 22];
+            app.BoxSelectionDropDownLabel.Text = 'Box Selection';
+
+            % Create BoxSelectionDropDown
+            app.BoxSelectionDropDown = uidropdown(app.BrightfieldPanel);
+            app.BoxSelectionDropDown.Items = {};
+            app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
+            app.BoxSelectionDropDown.Placeholder = 'No Data';
+            app.BoxSelectionDropDown.Position = [335 383 100 22];
+            app.BoxSelectionDropDown.Value = {};
+
+            % Create MicroscopeCalibrationDropDownLabel
+            app.MicroscopeCalibrationDropDownLabel = uilabel(app.BrightfieldPanel);
+            app.MicroscopeCalibrationDropDownLabel.HorizontalAlignment = 'right';
+            app.MicroscopeCalibrationDropDownLabel.Position = [450 383 128 22];
+            app.MicroscopeCalibrationDropDownLabel.Text = 'Microscope Calibration';
+
+            % Create MicroscopeCalibrationDropDown
+            app.MicroscopeCalibrationDropDown = uidropdown(app.BrightfieldPanel);
+            app.MicroscopeCalibrationDropDown.Items = {};
+            app.MicroscopeCalibrationDropDown.ValueChangedFcn = createCallbackFcn(app, @MicroscopeCalibrationumpxEditFieldValueChanged, true);
+            app.MicroscopeCalibrationDropDown.Placeholder = 'Load Calibration File';
+            app.MicroscopeCalibrationDropDown.Position = [593 383 168 22];
+            app.MicroscopeCalibrationDropDown.Value = {};
 
             % Create SarcomereLengthCalculationPanel
             app.SarcomereLengthCalculationPanel = uipanel(app.SLMeasureUIFigure);
             app.SarcomereLengthCalculationPanel.Title = 'Sarcomere Length Calculation';
-            app.SarcomereLengthCalculationPanel.Position = [219 12 1567 390];
+            app.SarcomereLengthCalculationPanel.Position = [219 13 1567 390];
 
             % Create fft_axis
             app.fft_axis = uiaxes(app.SarcomereLengthCalculationPanel);
@@ -844,7 +1315,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ylabel(app.fft_axis, 'Amplitude (A.U.)')
             zlabel(app.fft_axis, 'Z')
             app.fft_axis.Box = 'on';
-            app.fft_axis.Position = [14 23 600 323];
+            app.fft_axis.Position = [14 23 385 313];
 
             % Create ac_axis
             app.ac_axis = uiaxes(app.SarcomereLengthCalculationPanel);
@@ -853,132 +1324,325 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ylabel(app.ac_axis, 'Amplitude (A.U.)')
             zlabel(app.ac_axis, 'Z')
             app.ac_axis.Box = 'on';
-            app.ac_axis.Position = [631 24 600 323];
+            app.ac_axis.Position = [424 23 385 313];
+
+            % Create exp_axis
+            app.exp_axis = uiaxes(app.SarcomereLengthCalculationPanel);
+            title(app.exp_axis, 'Experiment')
+            xlabel(app.exp_axis, 'Frame')
+            ylabel(app.exp_axis, 'Sarcomere length (um)')
+            zlabel(app.exp_axis, 'Z')
+            app.exp_axis.Box = 'on';
+            app.exp_axis.Position = [1166 24 385 313];
 
             % Create UITable
             app.UITable = uitable(app.SarcomereLengthCalculationPanel);
             app.UITable.ColumnName = {'Box No'; 'FFT SL'; 'ACF SL'};
             app.UITable.RowName = {};
-            app.UITable.Position = [1265 57 280 271];
+            app.UITable.Position = [848 54 280 271];
 
             % Create ExportSLTableButton
             app.ExportSLTableButton = uibutton(app.SarcomereLengthCalculationPanel, 'push');
             app.ExportSLTableButton.ButtonPushedFcn = createCallbackFcn(app, @ExportSLTableButtonPushed, true);
-            app.ExportSLTableButton.Position = [1356 23 100 22];
+            app.ExportSLTableButton.Position = [939 20 100 22];
             app.ExportSLTableButton.Text = 'Export SL Table';
-
-            % Create LoadImageButton
-            app.LoadImageButton = uibutton(app.SLMeasureUIFigure, 'push');
-            app.LoadImageButton.ButtonPushedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
-            app.LoadImageButton.Position = [218 823 100 23];
-            app.LoadImageButton.Text = 'Load Image';
-
-            % Create NewBoxButton
-            app.NewBoxButton = uibutton(app.SLMeasureUIFigure, 'push');
-            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
-            app.NewBoxButton.Position = [332 823 82 23];
-            app.NewBoxButton.Text = 'New Box';
-
-            % Create BoxSelectionDropDownLabel
-            app.BoxSelectionDropDownLabel = uilabel(app.SLMeasureUIFigure);
-            app.BoxSelectionDropDownLabel.HorizontalAlignment = 'right';
-            app.BoxSelectionDropDownLabel.Position = [424 823 79 22];
-            app.BoxSelectionDropDownLabel.Text = 'Box Selection';
-
-            % Create BoxSelectionDropDown
-            app.BoxSelectionDropDown = uidropdown(app.SLMeasureUIFigure);
-            app.BoxSelectionDropDown.Items = {};
-            app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
-            app.BoxSelectionDropDown.Placeholder = 'No Data';
-            app.BoxSelectionDropDown.Position = [518 823 100 22];
-            app.BoxSelectionDropDown.Value = {};
-
-            % Create DeleteBoxButton
-            app.DeleteBoxButton = uibutton(app.SLMeasureUIFigure, 'push');
-            app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
-            app.DeleteBoxButton.Position = [640 823 100 22];
-            app.DeleteBoxButton.Text = 'Delete Box';
-
-            % Create MicroscopeCalibrationumpxDropDownLabel
-            app.MicroscopeCalibrationumpxDropDownLabel = uilabel(app.SLMeasureUIFigure);
-            app.MicroscopeCalibrationumpxDropDownLabel.HorizontalAlignment = 'right';
-            app.MicroscopeCalibrationumpxDropDownLabel.Position = [758 823 172 22];
-            app.MicroscopeCalibrationumpxDropDownLabel.Text = 'Microscope Calibration (um/px)';
-
-            % Create MicroscopeCalibrationumpxDropDown
-            app.MicroscopeCalibrationumpxDropDown = uidropdown(app.SLMeasureUIFigure);
-            app.MicroscopeCalibrationumpxDropDown.Items = {'0.2866', '1.4503', 'Add. Calibration'};
-            app.MicroscopeCalibrationumpxDropDown.ValueChangedFcn = createCallbackFcn(app, @MicroscopeCalibrationumpxEditFieldValueChanged, true);
-            app.MicroscopeCalibrationumpxDropDown.Placeholder = 'Select cal.';
-            app.MicroscopeCalibrationumpxDropDown.Position = [945 823 100 22];
-            app.MicroscopeCalibrationumpxDropDown.Value = '0.2866';
 
             % Create CameraPanel
             app.CameraPanel = uipanel(app.SLMeasureUIFigure);
             app.CameraPanel.Title = 'Camera Panel';
-            app.CameraPanel.Position = [10 12 199 833];
+            app.CameraPanel.Position = [10 13 199 904];
 
             % Create DeviceListPanel
             app.DeviceListPanel = uipanel(app.CameraPanel);
             app.DeviceListPanel.Title = 'Choose Device';
             app.DeviceListPanel.Tag = 'uipanel_device';
             app.DeviceListPanel.FontSize = 13.3333333333333;
-            app.DeviceListPanel.Position = [11 673 178 132];
+            app.DeviceListPanel.Position = [11 730 178 146];
 
-            % Create StartLiveMeasurementButton
-            app.StartLiveMeasurementButton = uibutton(app.DeviceListPanel, 'state');
-            app.StartLiveMeasurementButton.ValueChangedFcn = createCallbackFcn(app, @StartLiveMeasurementButtonValueChanged, true);
-            app.StartLiveMeasurementButton.Text = 'Start Live Measurement';
-            app.StartLiveMeasurementButton.Position = [18 18 143 22];
+            % Create LiveMeasurementModeButton
+            app.LiveMeasurementModeButton = uibutton(app.DeviceListPanel, 'state');
+            app.LiveMeasurementModeButton.ValueChangedFcn = createCallbackFcn(app, @LiveMeasurementModeButtonValueChanged, true);
+            app.LiveMeasurementModeButton.Text = 'Live Measurement Mode';
+            app.LiveMeasurementModeButton.Position = [16 35 148 22];
+
+            % Create LiveExperimentModeButton
+            app.LiveExperimentModeButton = uibutton(app.DeviceListPanel, 'state');
+            app.LiveExperimentModeButton.ValueChangedFcn = createCallbackFcn(app, @LiveExperimentModeButtonValueChanged, true);
+            app.LiveExperimentModeButton.Text = 'Live Experiment Mode';
+            app.LiveExperimentModeButton.Position = [16 6 148 22];
 
             % Create DeviceList
             app.DeviceList = uilistbox(app.CameraPanel);
             app.DeviceList.Items = {};
             app.DeviceList.Tag = 'listbox_device';
-            app.DeviceList.FontSize = 13.3333333333333;
-            app.DeviceList.Position = [20 724 160 51];
+            app.DeviceList.FontSize = 11;
+            app.DeviceList.Position = [20 795 160 51];
             app.DeviceList.Value = {};
 
             % Create SnapshotRecordPanel
             app.SnapshotRecordPanel = uipanel(app.CameraPanel);
-            app.SnapshotRecordPanel.Title = 'Snapshot and Record';
+            app.SnapshotRecordPanel.Title = 'Snapshot';
             app.SnapshotRecordPanel.Tag = 'uipanel_device';
             app.SnapshotRecordPanel.FontSize = 13.3333333333333;
-            app.SnapshotRecordPanel.Position = [11 519 178 62];
+            app.SnapshotRecordPanel.Position = [11 604 178 58];
+
+            % Create SaveImageButton
+            app.SaveImageButton = uibutton(app.SnapshotRecordPanel, 'push');
+            app.SaveImageButton.ButtonPushedFcn = createCallbackFcn(app, @SaveImageButtonPushed, true);
+            app.SaveImageButton.Position = [39 7 100 22];
+            app.SaveImageButton.Text = 'Save Image';
 
             % Create ExposurePanel
             app.ExposurePanel = uipanel(app.CameraPanel);
             app.ExposurePanel.Title = 'Exposure';
             app.ExposurePanel.Tag = 'uipanel_device';
             app.ExposurePanel.FontSize = 13.3333333333333;
-            app.ExposurePanel.Position = [11 426 178 62];
+            app.ExposurePanel.Position = [11 489 178 110];
+
+            % Create AutoExposureCheckBox
+            app.AutoExposureCheckBox = uicheckbox(app.ExposurePanel);
+            app.AutoExposureCheckBox.ValueChangedFcn = createCallbackFcn(app, @AutoExposureCheckBoxValueChanged, true);
+            app.AutoExposureCheckBox.Text = 'Auto Exposure';
+            app.AutoExposureCheckBox.Position = [9 64 101 22];
+            app.AutoExposureCheckBox.Value = true;
+
+            % Create ExposureTimemsEditFieldLabel
+            app.ExposureTimemsEditFieldLabel = uilabel(app.ExposurePanel);
+            app.ExposureTimemsEditFieldLabel.HorizontalAlignment = 'right';
+            app.ExposureTimemsEditFieldLabel.Enable = 'off';
+            app.ExposureTimemsEditFieldLabel.Position = [6 38 113 22];
+            app.ExposureTimemsEditFieldLabel.Text = 'Exposure Time (ms)';
+
+            % Create ExposureTimemsEditField
+            app.ExposureTimemsEditField = uieditfield(app.ExposurePanel, 'numeric');
+            app.ExposureTimemsEditField.Editable = 'off';
+            app.ExposureTimemsEditField.Enable = 'off';
+            app.ExposureTimemsEditField.Position = [132 38 41 22];
+
+            % Create ExposureSlider
+            app.ExposureSlider = uislider(app.ExposurePanel);
+            app.ExposureSlider.Limits = [0.244 2000];
+            app.ExposureSlider.MajorTicks = [];
+            app.ExposureSlider.MajorTickLabels = {''};
+            app.ExposureSlider.ValueChangedFcn = createCallbackFcn(app, @ExposureSliderValueChanged, true);
+            app.ExposureSlider.MinorTicks = [];
+            app.ExposureSlider.Enable = 'off';
+            app.ExposureSlider.Position = [16 18 148 3];
+            app.ExposureSlider.Value = 0.244;
 
             % Create WhiteBalancePanel
             app.WhiteBalancePanel = uipanel(app.CameraPanel);
             app.WhiteBalancePanel.Title = 'White Balance';
             app.WhiteBalancePanel.Tag = 'uipanel_device';
             app.WhiteBalancePanel.FontSize = 13.3333333333333;
-            app.WhiteBalancePanel.Position = [11 240 178 62];
+            app.WhiteBalancePanel.Position = [12 291 178 193];
+
+            % Create ColorTemperatureEditFieldLabel
+            app.ColorTemperatureEditFieldLabel = uilabel(app.WhiteBalancePanel);
+            app.ColorTemperatureEditFieldLabel.HorizontalAlignment = 'right';
+            app.ColorTemperatureEditFieldLabel.Enable = 'off';
+            app.ColorTemperatureEditFieldLabel.Position = [5 142 105 22];
+            app.ColorTemperatureEditFieldLabel.Text = 'Color Temperature';
+
+            % Create ColorTemperatureEditField
+            app.ColorTemperatureEditField = uieditfield(app.WhiteBalancePanel, 'numeric');
+            app.ColorTemperatureEditField.Editable = 'off';
+            app.ColorTemperatureEditField.Enable = 'off';
+            app.ColorTemperatureEditField.Position = [117 142 58 22];
+
+            % Create ColorTempSlider
+            app.ColorTempSlider = uislider(app.WhiteBalancePanel);
+            app.ColorTempSlider.Limits = [2000 15000];
+            app.ColorTempSlider.MajorTicks = [];
+            app.ColorTempSlider.MajorTickLabels = {''};
+            app.ColorTempSlider.ValueChangedFcn = createCallbackFcn(app, @ColorTempSliderValueChanged, true);
+            app.ColorTempSlider.MinorTicks = [];
+            app.ColorTempSlider.Enable = 'off';
+            app.ColorTempSlider.Position = [15 124 148 3];
+            app.ColorTempSlider.Value = 6503;
+
+            % Create TintEditFieldLabel
+            app.TintEditFieldLabel = uilabel(app.WhiteBalancePanel);
+            app.TintEditFieldLabel.HorizontalAlignment = 'right';
+            app.TintEditFieldLabel.Enable = 'off';
+            app.TintEditFieldLabel.Position = [8 91 25 22];
+            app.TintEditFieldLabel.Text = 'Tint';
+
+            % Create TintEditField
+            app.TintEditField = uieditfield(app.WhiteBalancePanel, 'numeric');
+            app.TintEditField.Editable = 'off';
+            app.TintEditField.Enable = 'off';
+            app.TintEditField.Position = [117 91 58 22];
+
+            % Create TintSlider
+            app.TintSlider = uislider(app.WhiteBalancePanel);
+            app.TintSlider.Limits = [200 2500];
+            app.TintSlider.MajorTicks = [];
+            app.TintSlider.MajorTickLabels = {''};
+            app.TintSlider.ValueChangedFcn = createCallbackFcn(app, @TintSliderValueChanged, true);
+            app.TintSlider.MinorTicks = [];
+            app.TintSlider.Enable = 'off';
+            app.TintSlider.Position = [15 74 148 3];
+            app.TintSlider.Value = 1000;
+
+            % Create WhiteBalanceButton
+            app.WhiteBalanceButton = uibutton(app.WhiteBalancePanel, 'push');
+            app.WhiteBalanceButton.ButtonPushedFcn = createCallbackFcn(app, @WhiteBalanceButtonPushed, true);
+            app.WhiteBalanceButton.Enable = 'off';
+            app.WhiteBalanceButton.Position = [38 38 100 22];
+            app.WhiteBalanceButton.Text = 'White Balance';
+
+            % Create WBDefaultsButton
+            app.WBDefaultsButton = uibutton(app.WhiteBalancePanel, 'push');
+            app.WBDefaultsButton.ButtonPushedFcn = createCallbackFcn(app, @WBDefaultsButtonPushed, true);
+            app.WBDefaultsButton.Enable = 'off';
+            app.WBDefaultsButton.Position = [38 9 100 22];
+            app.WBDefaultsButton.Text = 'Defaults';
 
             % Create ColorAdjustmentPanel
             app.ColorAdjustmentPanel = uipanel(app.CameraPanel);
             app.ColorAdjustmentPanel.Title = 'Color Adjustment';
             app.ColorAdjustmentPanel.Tag = 'uipanel_device';
             app.ColorAdjustmentPanel.FontSize = 13.3333333333333;
-            app.ColorAdjustmentPanel.Position = [11 152 178 62];
+            app.ColorAdjustmentPanel.Position = [11 8 178 277];
+
+            % Create HueEditFieldLabel
+            app.HueEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
+            app.HueEditFieldLabel.HorizontalAlignment = 'right';
+            app.HueEditFieldLabel.Enable = 'off';
+            app.HueEditFieldLabel.Position = [6 226 28 22];
+            app.HueEditFieldLabel.Text = 'Hue';
+
+            % Create HueEditField
+            app.HueEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
+            app.HueEditField.Editable = 'off';
+            app.HueEditField.Enable = 'off';
+            app.HueEditField.Position = [116 226 57 22];
+
+            % Create HueSlider
+            app.HueSlider = uislider(app.ColorAdjustmentPanel);
+            app.HueSlider.Limits = [-100 100];
+            app.HueSlider.MajorTicks = [];
+            app.HueSlider.MajorTickLabels = {''};
+            app.HueSlider.ValueChangedFcn = createCallbackFcn(app, @HueSliderValueChanged, true);
+            app.HueSlider.MinorTicks = [];
+            app.HueSlider.Enable = 'off';
+            app.HueSlider.Position = [10 212 158 3];
+
+            % Create SaturationSlider
+            app.SaturationSlider = uislider(app.ColorAdjustmentPanel);
+            app.SaturationSlider.Limits = [0 255];
+            app.SaturationSlider.MajorTicks = [];
+            app.SaturationSlider.MajorTickLabels = {''};
+            app.SaturationSlider.ValueChangedFcn = createCallbackFcn(app, @SaturationSliderValueChanged, true);
+            app.SaturationSlider.MinorTicks = [];
+            app.SaturationSlider.Enable = 'off';
+            app.SaturationSlider.Position = [13 170 158 3];
+            app.SaturationSlider.Value = 128;
+
+            % Create SaturationEditFieldLabel
+            app.SaturationEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
+            app.SaturationEditFieldLabel.HorizontalAlignment = 'right';
+            app.SaturationEditFieldLabel.Enable = 'off';
+            app.SaturationEditFieldLabel.Position = [6 184 60 22];
+            app.SaturationEditFieldLabel.Text = 'Saturation';
+
+            % Create SaturationEditField
+            app.SaturationEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
+            app.SaturationEditField.Editable = 'off';
+            app.SaturationEditField.Enable = 'off';
+            app.SaturationEditField.Position = [116 184 57 22];
+
+            % Create BrightnessSlider
+            app.BrightnessSlider = uislider(app.ColorAdjustmentPanel);
+            app.BrightnessSlider.Limits = [-64 64];
+            app.BrightnessSlider.MajorTicks = [];
+            app.BrightnessSlider.MajorTickLabels = {''};
+            app.BrightnessSlider.ValueChangedFcn = createCallbackFcn(app, @BrightnessSliderValueChanged, true);
+            app.BrightnessSlider.MinorTicks = [];
+            app.BrightnessSlider.Enable = 'off';
+            app.BrightnessSlider.Position = [11 128 158 3];
+
+            % Create BrightnessEditFieldLabel
+            app.BrightnessEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
+            app.BrightnessEditFieldLabel.HorizontalAlignment = 'right';
+            app.BrightnessEditFieldLabel.Enable = 'off';
+            app.BrightnessEditFieldLabel.Position = [6 142 62 22];
+            app.BrightnessEditFieldLabel.Text = 'Brightness';
+
+            % Create BrightnessEditField
+            app.BrightnessEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
+            app.BrightnessEditField.Editable = 'off';
+            app.BrightnessEditField.Enable = 'off';
+            app.BrightnessEditField.Position = [114 142 57 22];
+
+            % Create ContrastSlider
+            app.ContrastSlider = uislider(app.ColorAdjustmentPanel);
+            app.ContrastSlider.Limits = [-100 100];
+            app.ContrastSlider.MajorTicks = [];
+            app.ContrastSlider.MajorTickLabels = {''};
+            app.ContrastSlider.ValueChangedFcn = createCallbackFcn(app, @ContrastSliderValueChanged, true);
+            app.ContrastSlider.MinorTicks = [];
+            app.ContrastSlider.Enable = 'off';
+            app.ContrastSlider.Position = [11 86 158 3];
+
+            % Create ContrastEditFieldLabel
+            app.ContrastEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
+            app.ContrastEditFieldLabel.HorizontalAlignment = 'right';
+            app.ContrastEditFieldLabel.Enable = 'off';
+            app.ContrastEditFieldLabel.Position = [6 100 51 22];
+            app.ContrastEditFieldLabel.Text = 'Contrast';
+
+            % Create ContrastEditField
+            app.ContrastEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
+            app.ContrastEditField.Editable = 'off';
+            app.ContrastEditField.Enable = 'off';
+            app.ContrastEditField.Position = [114 100 57 22];
+
+            % Create GammaSlider
+            app.GammaSlider = uislider(app.ColorAdjustmentPanel);
+            app.GammaSlider.Limits = [20 180];
+            app.GammaSlider.MajorTicks = [];
+            app.GammaSlider.MajorTickLabels = {''};
+            app.GammaSlider.ValueChangedFcn = createCallbackFcn(app, @GammaSliderValueChanged, true);
+            app.GammaSlider.MinorTicks = [];
+            app.GammaSlider.Enable = 'off';
+            app.GammaSlider.Position = [11 44 158 3];
+            app.GammaSlider.Value = 100;
+
+            % Create GammaEditFieldLabel
+            app.GammaEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
+            app.GammaEditFieldLabel.HorizontalAlignment = 'right';
+            app.GammaEditFieldLabel.Enable = 'off';
+            app.GammaEditFieldLabel.Position = [9 58 48 22];
+            app.GammaEditFieldLabel.Text = 'Gamma';
+
+            % Create GammaEditField
+            app.GammaEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
+            app.GammaEditField.Editable = 'off';
+            app.GammaEditField.Enable = 'off';
+            app.GammaEditField.Position = [114 58 57 22];
+
+            % Create DefaultsButton
+            app.DefaultsButton = uibutton(app.ColorAdjustmentPanel, 'push');
+            app.DefaultsButton.ButtonPushedFcn = createCallbackFcn(app, @DefaultsButtonPushed, true);
+            app.DefaultsButton.Enable = 'off';
+            app.DefaultsButton.Position = [39 8 100 22];
+            app.DefaultsButton.Text = 'Defaults';
 
             % Create ResolutionPanel
             app.ResolutionPanel = uipanel(app.CameraPanel);
             app.ResolutionPanel.Title = 'Resolution';
             app.ResolutionPanel.Tag = 'uipanel_device';
             app.ResolutionPanel.FontSize = 13.3333333333333;
-            app.ResolutionPanel.Position = [11 599 178 62];
+            app.ResolutionPanel.Position = [11 668 178 58];
 
             % Create ResolutionDropDown
             app.ResolutionDropDown = uidropdown(app.ResolutionPanel);
             app.ResolutionDropDown.Items = {'4096 x 3288', '2048 x 1644', '1024 x 822'};
+            app.ResolutionDropDown.Enable = 'off';
             app.ResolutionDropDown.Placeholder = 'Height x Width';
-            app.ResolutionDropDown.Position = [26 11 128 22];
+            app.ResolutionDropDown.Position = [26 7 128 22];
             app.ResolutionDropDown.Value = '1024 x 822';
 
             % Show the figure after all components are created
