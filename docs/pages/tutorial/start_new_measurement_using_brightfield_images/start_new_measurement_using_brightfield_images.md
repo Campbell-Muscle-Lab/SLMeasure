@@ -62,7 +62,7 @@ Upon clicking the Load Image button, it opens a normal Windows File Open Dialog.
 
 <a href="media/file_open.png" target="_blank">![File open](media/file_open.png)</a>
 
-An image should now be displayed in the Brightfield panel (red rectangle). The loaded image is a permeabilized preparation from the left ventricle. We expect to see a sarcomere length ranging from 1.9 - 2.3 um in this example.
+An image should now be displayed in the Brightfield panel (red rectangle). The loaded image is a permeabilized preparation from the left atria. We expect to see a sarcomere length ranging from 1.9 - 2.3 um in this example.
 
 <a href="media/image_loaded.png" target="_blank">![Image loaded](media/image_loaded.png)</a>
 
