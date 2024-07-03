@@ -7,7 +7,7 @@ params.y_data=[];
 params.min_x_index_spacing=[];
 params.min_lambda=[];
 params.max_lambda=[];
-
+params.p = [];
 params=parse_pv_pairs(params,varargin);
 
 x_data=params.x_data;
@@ -41,13 +41,24 @@ else
     p(4) = 15;
 end
 
-p=p;
-lower_bounds=[0 0 -inf eps];
-upper_bounds=[inf inf inf inf];
+if isempty(params.p)
+    p=p;
+else
+    p = params.p;
+end
+lower_bounds=[0 0 0 p(4)*0.5];
+upper_bounds=[inf 1 p(4)*1.25 p(4)*1.25];
 
 % Fit
+
+
+opts=optimset('fminsearch');
+opts.Display='off';
+opts.MaxIter=1000;
+opts.MaxFunEvals=10000;
+
 p=fminsearchbnd(@sine_wave_fit,p,lower_bounds,upper_bounds, ...
-    [],x_data,y_data);
+    opts,x_data,y_data);
 
 fit=exp(-p(1)*x_data).*p(2).*sin(2*pi*(x_data+p(3))./p(4));
 
@@ -55,7 +66,7 @@ lambda=p(4);
 fit_parameters=p;
 r_squared=calculate_r_squared(y_data,fit);
 y_fit=fit;
-
+p
 end
 
 

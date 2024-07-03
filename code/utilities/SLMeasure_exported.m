@@ -7,8 +7,6 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         SaveMeasurementMenu             matlab.ui.container.Menu
         LoadMeasurementMenu             matlab.ui.container.Menu
         CameraPanel                     matlab.ui.container.Panel
-        ResolutionPanel                 matlab.ui.container.Panel
-        ResolutionDropDown              matlab.ui.control.DropDown
         ColorAdjustmentPanel            matlab.ui.container.Panel
         DefaultsButton                  matlab.ui.control.Button
         GammaEditField                  matlab.ui.control.NumericEditField
@@ -42,16 +40,17 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         AutoExposureCheckBox            matlab.ui.control.CheckBox
         SnapshotRecordPanel             matlab.ui.container.Panel
         SaveImageButton                 matlab.ui.control.Button
-        DeviceList                      matlab.ui.control.ListBox
+        ResolutionPanel                 matlab.ui.container.Panel
+        ResolutionDropDown              matlab.ui.control.DropDown
         DeviceListPanel                 matlab.ui.container.Panel
-        LiveExperimentModeButton        matlab.ui.control.StateButton
+        DeviceList                      matlab.ui.control.ListBox
         LiveMeasurementModeButton       matlab.ui.control.StateButton
         SarcomereLengthCalculationPanel  matlab.ui.container.Panel
         ExportSLTableButton             matlab.ui.control.Button
         UITable                         matlab.ui.control.Table
-        exp_axis                        matlab.ui.control.UIAxes
+        px_intensity                    matlab.ui.control.UIAxes
+        calculation_axis                matlab.ui.control.UIAxes
         ac_axis                         matlab.ui.control.UIAxes
-        fft_axis                        matlab.ui.control.UIAxes
         BrightfieldPanel                matlab.ui.container.Panel
         MicroscopeCalibrationDropDown   matlab.ui.control.DropDown
         MicroscopeCalibrationDropDownLabel  matlab.ui.control.Label
@@ -68,10 +67,9 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         CalibrationFilePathEditField    matlab.ui.control.EditField
         CalibrationFilePathEditFieldLabel  matlab.ui.control.Label
         LoadMicroscopeCalibrationFileButton  matlab.ui.control.Button
-        calculation_axis                matlab.ui.control.UIAxes
-        px_intensity                    matlab.ui.control.UIAxes
         inset_axis                      matlab.ui.control.UIAxes
         image_axis                      matlab.ui.control.UIAxes
+        fft_axis                        matlab.ui.control.UIAxes
     end
 
 
@@ -101,10 +99,11 @@ classdef SLMeasure_exported < matlab.apps.AppBase
         ToupcamData
         Devices
         live_measurement = 0;
-        live_experiment = 0; 
-        boxes 
-        live_fig_handle 
-        time 
+        live_experiment = 0;
+        boxes
+        live_fig_handle
+        time
+        moving_box % Description
     end
 
     methods (Access = private)
@@ -134,20 +133,6 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.roi_box = [];
 
             box_no = str2num(app.BoxSelectionDropDown.Value);
-            %             Box Resize if neccessary
-            %             n = numel(app.sl_data.box_handle);
-            %             for i=1:n
-            %                 p(i,1:4) = app.sl_data.box_handle(i).Position;
-            %             end
-            %             w = p(box_no,3);
-            %             h = p(box_no,4);
-            %             if ((w~=app.sl_data.old_width)|(h~=app.sl_data.old_height))
-            %                 for i=1:n
-            %                     p(i,3) = w;
-            %                     p(i,4) = h;
-            %                     app.sl_data.box_handle(i).Position = p(i,:);
-            %                 end
-            %             end
 
             if app.live_measurement == 1 || ...
                     (app.live_measurement == 2 && ...
@@ -184,39 +169,72 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.lags = [];
             app.y_fit = [];
             app.r_squared = [];
+            lambda = [];
+            temp_sarclen_acf = [];
+            temp_sarclen_fft = [];
+            max_mag = [];
+            max_ix = [];
+            fit_parameters = [];
 
             if (ndims(app.roi_box)==3)
                 app.roi_box = rgb2gray(app.roi_box);
             end
+
 
             for ct = 1 : size(app.roi_box,1)
                 app.profile(ct,:) = app.roi_box(ct,:);
                 app.sig(ct,:)  = (diff(app.profile(ct,:)));
                 SLFFT(app,ct);
                 SLAutoCorr(app,ct);
+                if ~app.moving_box
+
+                    if ct > 1
+                        [lambda(ct),fit_parameters,app.r_squared(ct),app.y_fit(ct,:)] = fit_damped_sine_wave('y_data',app.X_acf(ct,:),...
+                            'x_data',app.lags(ct,:),'p',fit_parameters);
+                    else
+                        [lambda(ct),fit_parameters,app.r_squared(ct),app.y_fit(ct,:)] = fit_damped_sine_wave('y_data',app.X_acf(ct,:),...
+                            'x_data',app.lags(ct,:));
+                    end
+
+                    app.wavelength(ct) = lambda(ct);
+                    temp_sarclen_acf(ct) = lambda(ct) * app.sl_data.calibration.px_cal;
+                    peaks = [];
+                    locs = [];
+                    [peaks, locs] = findpeaks(app.P2(ct,:));
+                    [max_mag(ct),max_ix(ct)] = max(peaks);
+                end
+
+
+            end
+            if ~app.moving_box
+            m = 1;
+            for ct = 1 : size(app.roi_box,1)
+
+                if app.r_squared(ct) < 0.8
+                    prune_ix(m) = ct;
+                    m = m + 1;
+                end
+            end
+            temp_sarclen_acf(prune_ix) = [];
+
+            app.sl_data.sarcomere_length_acf(box_no) = mean(temp_sarclen_acf);
             end
 
-            app.mean_X_acf = mean(app.X_acf,1);
-            app.mean_P2 = mean(app.P2,1);
 
-            [lambda,fit_parameters,app.r_squared,app.y_fit] = fit_damped_sine_wave('y_data',app.mean_X_acf,...
-                'x_data',app.lags(1,:), 'min_x_index_spacing',5);
-            if app.sl_data.calibration.px_cal ~=0
-                app.sl_data.sarcomere_length_acf(box_no) = lambda * app.sl_data.calibration.px_cal;
-                app.wavelength = lambda;
-            else
-                app.sl_data.sarcomere_length_acf(box_no) = 0;
-            end
-
-            [peaks, locs] = findpeaks(app.mean_P2);
-            [max_mag,max_ix] = max(peaks);
-            F_p = 0:numel(app.mean_P2)-1;
-            if app.sl_data.calibration.px_cal ~=0
-                app.sl_data.sarcomere_length_fft(box_no) = ...
-                    size(app.sig,2)*app.sl_data.calibration.px_cal/F_p(locs(max_ix));
-            else
-                app.sl_data.sarcomere_length_fft(box_no) = 0;
-            end
+            %             app.mean_X_acf = mean(app.X_acf,1);
+            %             app.mean_P2 = mean(app.P2,1);
+            %
+            %
+            %
+            %             [peaks, locs] = findpeaks(app.mean_P2);
+            %             [max_mag,max_ix] = max(peaks);
+            %             F_p = 0:numel(app.mean_P2)-1;
+            %             if app.sl_data.calibration.px_cal ~=0
+            %                 app.sl_data.sarcomere_length_fft(box_no) = ...
+            %                     size(app.sig,2)*app.sl_data.calibration.px_cal/F_p(locs(max_ix));
+            %             else
+            %                 app.sl_data.sarcomere_length_fft(box_no) = 0;
+            %             end
 
             UpdateDisplay(app)
         end
@@ -233,7 +251,9 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         function SLFFT(app,ct)
             x = app.sig(ct,:);
-            X = fft(x);
+            l_x = length(x);
+            n_fft = 2^nextpow2(l_x);
+            X = fft(x,n_fft);
             L = numel(X);
             app.P2(ct,:) = abs(X/L);
         end
@@ -241,14 +261,14 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         function UpdateTable(app)
 
-            for i = 1:numel(app.sl_data.sarcomere_length_fft)
+            for i = 1:numel(app.sl_data.sarcomere_length_acf)
                 s.box_no{i,1} = sprintf('%i',i);
-                s.fft_sl(i,1) = app.sl_data.sarcomere_length_fft(i);
+                %                 s.fft_sl(i,1) = app.sl_data.sarcomere_length_fft(i);
                 s.acf_sl(i,1) = app.sl_data.sarcomere_length_acf(i);
             end
 
             s.box_no{end+1,1} = 'Average';
-            s.fft_sl(end+1,1) = mean(app.sl_data.sarcomere_length_fft);
+            %             s.fft_sl(end+1,1) = mean(app.sl_data.sarcomere_length_fft);
             s.acf_sl(end+1,1) = mean(app.sl_data.sarcomere_length_acf);
 
             t = struct2table(s);
@@ -260,113 +280,109 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         function UpdateDisplay(app)
             row_no = app.ROIRowSelectSpinner.Value;
-            hold(app.px_intensity,"on")
             m = app.ROIRowSelectSpinner.Limits(2);
             cm = lines(m);
+            cm_s = cm;
+            cm(:,4) = 0.2;
+            hold(app.px_intensity,"on")
+            hold(app.calculation_axis,"on")
+            hold(app.fft_axis,"on")
+            hold(app.ac_axis,"on")
+
             for j = 1 : m
                 plot(app.px_intensity,app.roi_box(j,:), ...
-                    'LineStyle',':',"LineWidth",0.25,'Color',cm(j,:));
+                    'LineStyle','-',"LineWidth",0.25,'Color',cm(j,:));
+                plot(app.calculation_axis, app.sig(j,:), ...
+                    'LineStyle','-',"LineWidth",0.25,'Color',cm(j,:));
+                % scatter(app.ac_axis,app.lags(j,:),app.X_acf(j,:),...
+                %     'MarkerFaceColor',cm_s(j,:),'MarkerFaceAlpha',.05,'MarkerEdgeAlpha',.05);
+                plot(app.fft_axis,app.P2(j,:), ...
+                    'LineStyle','-',"LineWidth",0.25,'Color',cm(j,:));
+
             end
+
 
             plot(app.px_intensity,app.roi_box(row_no,:), ...
-                'LineStyle','-',"LineWidth",2,'Color',cm(row_no,:));
-            hold(app.calculation_axis,"on")
-            plot(app.calculation_axis, app.sig(row_no,:),'Color',cm(row_no,:),"LineWidth",2)
+                "LineWidth",2,'Color','r');
+            plot(app.calculation_axis, app.sig(row_no,:),...
+                'Color','r',"LineWidth",2)
             xlim(app.px_intensity, [1 numel(app.profile(row_no,:))])
             xlim(app.calculation_axis, [1 numel(app.profile(row_no,:))])
-
-            hold(app.fft_axis,"on")
-            F_p = 0:numel(app.mean_P2)-1;
-            [peaks, locs] = findpeaks(app.mean_P2);
-            [max_mag,max_ix] = max(peaks);
-            fft_ix = (1:numel(app.mean_P2)-1)/(numel(app.mean_P2));
-            fft_ix = [0 fft_ix];
-            plot(app.fft_axis,fft_ix,app.mean_P2,'Color','b','LineWidth',2)
-            plot(app.fft_axis,fft_ix(locs(max_ix)),app.mean_P2(locs(max_ix)),'pentagram', ...
-                'MarkerSize',15,"Color",'k','MarkerFaceColor','k')
-            xlim(app.fft_axis,[0 fft_ix(end)])
-            ylim(app.fft_axis,[0 max(max(app.mean_P2))+1])
-            t = sprintf('Peak is at %.3f px^{-1}',fft_ix(locs(max_ix)));
-            text(app.fft_axis,fft_ix(locs(max_ix))+0.25,max(peaks),t)
-
-            plot(app.ac_axis,app.lags(1,:),app.mean_X_acf,'o','LineWidth',2,'color','r')
-            hold(app.ac_axis,"on")
-            plot(app.ac_axis,app.lags(1,:),app.y_fit,'color','k','LineWidth',1.5)
-            if ~isempty(app.wavelength)
-                t1 = sprintf('Wavelength  = %.3f px',app.wavelength);
-                t2 = sprintf('R-squared = %.3f', app.r_squared);
-                text(app.ac_axis,round(0.7*numel(app.mean_X_acf))-10,0.6,t1)
-                text(app.ac_axis,round(0.7*numel(app.mean_X_acf))-10,0.8,t2)
+            if ~app.moving_box
+                plot(app.ac_axis,app.lags(row_no,:),app.X_acf(row_no,:),'o',...
+                    'Color','r',"LineWidth",2)
+                hold(app.ac_axis,"on")
+                plot(app.ac_axis,app.lags(row_no,:),app.y_fit(row_no,:),'color','k','LineWidth',1.5)
+                t1 = sprintf('Wavelength  = %.3f px',app.wavelength(row_no));
+                if app.r_squared(row_no) < 0.8
+                    t2 = sprintf('R-squared = %.3f (Excluded)', app.r_squared(row_no));
+                    text_color = 'r';
+                else
+                    t2 = sprintf('R-squared = %.3f', app.r_squared(row_no));
+                    text_color = 'k';
+                end
+                text(app.ac_axis,round(0.7*numel(app.X_acf(row_no,:)))-10,0.6,t1)
+                text(app.ac_axis,round(0.7*numel(app.X_acf(row_no,:)))-10,0.8,t2,'Color',text_color)
+                ylim(app.ac_axis,[-1 1])
             end
-            %             xlim(app.ac_axis,[0 round(numel(x)/2)])
-            ylim(app.ac_axis,[-1 1])
+
+            %             F_p = 0:numel(app.mean_P2)-1;
+            %             [peaks, locs] = findpeaks(app.mean_P2);
+            %             [max_mag,max_ix] = max(peaks);
+            %             fft_ix = (1:numel(app.mean_P2)-1)/(numel(app.mean_P2));
+            %             fft_ix = [0 fft_ix];
+            %             plot(app.fft_axis,fft_ix,app.mean_P2,'Color','b','LineWidth',2)
+            %             plot(app.fft_axis,fft_ix(locs(max_ix)),app.mean_P2(locs(max_ix)),'pentagram', ...
+            %                 'MarkerSize',15,"Color",'k','MarkerFaceColor','k')
+            %             xlim(app.fft_axis,[0 fft_ix(end)])
+            %             ylim(app.fft_axis,[0 max(max(app.mean_P2))+1])
+            %             t = sprintf('Peak is at %.3f px^{-1}',fft_ix(locs(max_ix)));
+            %             text(app.fft_axis,fft_ix(locs(max_ix))+0.25,max(peaks),t)
+
+
+
 
         end
 
 
+        function CameraPanelControls(app,stat)
 
-        function LiveSarcomereLength(app,m)
+            controls = {'ExposureSlider','ExposureTimemsEditField','ExposureTimemsEditFieldLabel',...
+                'ColorTempSlider','ColorTemperatureEditFieldLabel','ColorTemperatureEditField',...
+                'TintSlider','TintEditFieldLabel','TintEditField','WhiteBalanceButton','WBDefaultsButton',...
+                'HueSlider','HueEditField','HueEditFieldLabel','SaturationSlider','SaturationEditField','SaturationEditFieldLabel',...
+                'BrightnessSlider','BrightnessEditField','BrightnessEditFieldLabel','ContrastSlider','ContrastEditField','ContrastEditFieldLabel',...
+                'GammaSlider','GammaEditField','GammaEditFieldLabel','DefaultsButton','ResolutionDropDown','SaveImageButton','AutoExposureCheckBox'};
 
-            app.sl_data.image_file = app.live_image;
+            for i = 1 : numel(controls)
 
+                app.(controls{i}).Enable = stat;
 
-            for box_no = 1 : numel(app.sl_data.box_handle)
-                app.roi_box = [];
-
-                app.roi_box = imcrop(app.sl_data.image_file, ...
-                    app.sl_data.box_handle(box_no).Position);
-
-                app.profile = [];
-                app.sig = [];
-                sl_fft = [];
-                sl_acf = [];
-                app.P2 = [];
-                app.X_acf = [];
-                app.wavelength = [];
-                app.lags = [];
-                app.y_fit = [];
-                app.r_squared = [];
-
-                if (ndims(app.roi_box)==3)
-                    app.roi_box = rgb2gray(app.roi_box);
-                end
-
-                for ct = 1 : size(app.roi_box,1)
-                    app.profile(ct,:) = app.roi_box(ct,:);
-                    app.sig(ct,:)  = (diff(app.profile(ct,:)));
-                    SLFFT(app,ct);
-                    %                 SLAutoCorr(app,ct);
-                end
-
-                app.mean_X_acf = mean(app.X_acf,1);
-                app.mean_P2 = mean(app.P2,1);
-
-                [lambda,fit_parameters,app.r_squared,app.y_fit] = fit_damped_sine_wave('y_data',app.mean_X_acf,...
-                    'x_data',app.lags(1,:), 'min_x_index_spacing',5);
-                if app.sl_data.calibration.px_cal ~=0
-                    app.sl_data.live.sarcomere_length_acf(m,box_no) = lambda * app.sl_data.calibration.px_cal;
-                    app.wavelength = lambda;
-                else
-                    app.sl_data.live.sarcomere_length_acf(m,box_no) = 0;
-                end
-
-                [peaks, locs] = findpeaks(app.mean_P2);
-                [max_mag,max_ix] = max(peaks);
-                F_p = 0:numel(app.mean_P2)-1;
-                if app.sl_data.calibration.px_cal ~=0
-                    app.sl_data.live.sarcomere_length_fft(m,box_no) = ...
-                        size(app.sig,2)*app.sl_data.calibration.px_cal/F_p(locs(max_ix));
-                else
-                    app.sl_data.live.sarcomere_length_fft(m,box_no) = 0;
-                end
-                app.sl_data.live.sarcomere_length_fft(m,box_no) = 4 + rand(1,1);
-                app.sl_data.live.sarcomere_length_acf(m,box_no) = 2 + rand(1,1);
             end
-            cm = parula(box_no);
-            hold(app.exp_axis,"on")
-            for i = 1:box_no
-                plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_fft(1:m,i),'Color',cm(i,:),"Marker","pentagram",'LineWidth',2)
-                plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_acf(1:m,i),'Color',cm(i,:),"Marker","o",'LineWidth',2)
+
+            if strcmp(stat, 'on')
+                app.ExposureSlider.Enable = 'off';
+                app.ExposureTimemsEditField.Enable = 'off';
+                app.ExposureTimemsEditFieldLabel.Enable = 'off';
+                gui_values = {'ColorTempSlider','ColorTemperatureEditField',...
+                    'TintSlider','TintEditField','HueSlider','HueEditField',...
+                    'SaturationSlider','SaturationEditField','BrightnessSlider','BrightnessEditField',...
+                    'ContrastSlider','ContrastEditField','GammaSlider','GammaEditField'};
+                def_values = {'TOUPCAM_TEMP_DEF','TOUPCAM_TINT_DEF',...
+                    'TOUPCAM_HUE_DEF','TOUPCAM_SATURATION_DEF',...
+                    'TOUPCAM_BRIGHTNESS_DEF','TOUPCAM_CONTRAST_DEF','TOUPCAM_GAMMA_DEF'};
+
+                t = 1;
+                for i = 1 : numel(gui_values)
+
+                    app.(gui_values{i}).Value = app.ToupcamData.(def_values{t});
+
+                    if ~mod(i,2)
+                        t = t + 1;
+                    end
+
+                end
+
             end
         end
     end
@@ -386,7 +402,6 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ipath = ['-I' fullfile(cd,'camera')];
             f = fullfile(cd,'camera','mexToupcam.cpp');
             lib = fullfile(cd,'camera','toupcam.lib');
-            %             mex mexToupcam.cpp -ltoupcam
 
             mex('-v','-R2017b',ipath,f,lib)
 
@@ -476,9 +491,6 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.sl_data.box_label(n) = text(app.image_axis, ...
                 p(1)+p(3)+20,p(2)-30,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18,"Color",'k');
 
-            app.roi_pos = get(app.roi_rec, 'Position');
-%             app.px_cal = app.MicroscopeCalibrationDropDown.Value;
-
             for i=1:n
                 control_strings{i}=sprintf('%.0f',i);
             end
@@ -488,9 +500,24 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
             SarcomereLength(app)
             %             app.boxes(n) = app.sl_data.box_handle(n);
+            app.moving_box = 0;
             UpdateTable(app);
-            addlistener(app.sl_data.box_handle(n),"MovingROI",@(src,evt) UpdateSL(evt));
+            addlistener(app.sl_data.box_handle(n),"MovingROI",@(src,evt) UpdateSLDisp(evt));
+            % addlistener(app.sl_data.box_handle(n),"ROIMoved",@(src,evt) UpdateSL(evt));
 
+            function UpdateSLDisp(evt)
+                box_no = str2num(app.BoxSelectionDropDown.Value);
+                app.ROIHeightpxEditField.Value = app.sl_data.box_handle(box_no).Position(3);
+                app.ROIWidthpxEditField.Value = app.sl_data.box_handle(box_no).Position(4);
+                cla(app.px_intensity)
+                cla(app.calculation_axis)
+                cla(app.fft_axis)
+                cla(app.ac_axis)
+                app.moving_box = 0;
+                SarcomereLength(app)
+                UpdateTable(app);
+
+            end
             function UpdateSL(evt)
                 box_no = str2num(app.BoxSelectionDropDown.Value);
                 app.ROIHeightpxEditField.Value = app.sl_data.box_handle(box_no).Position(3);
@@ -499,6 +526,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 cla(app.calculation_axis)
                 cla(app.fft_axis)
                 cla(app.ac_axis)
+                app.moving_box = 0;
                 SarcomereLength(app)
                 UpdateTable(app);
             end
@@ -577,7 +605,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 app.sl_data.box_position(i,:) = app.sl_data.box_handle(i).Position;
             end
             if isfield(app.sl_data,'image_file_string')
-            save_data.image_file_string = app.sl_data.image_file_string;
+                save_data.image_file_string = app.sl_data.image_file_string;
             end
             save_data.im_data = app.sl_data.image_file;
             save_data.box_position = app.sl_data.box_position;
@@ -611,19 +639,19 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
                 app.sl_data = [];
                 if isfield(save_data,'image_file_string')
-                app.sl_data.image_file_string = save_data.image_file_string;
+                    app.sl_data.image_file_string = save_data.image_file_string;
                 end
                 app.sl_data.image_file = save_data.im_data;
                 app.sl_data.calibration = save_data.calibration;
 
                 for i = 1 : size(app.sl_data.calibration.table,1)
                     name = sprintf('Obj. %s: %.4f um/px',app.sl_data.calibration.table.Objective{i}, app.sl_data.calibration.table.Calibration(i));
-                    app.MicroscopeCalibrationDropDown.Items{i} = name; 
+                    app.MicroscopeCalibrationDropDown.Items{i} = name;
                 end
-                
+
                 app.CalibrationFilePathEditField.Value = app.sl_data.calibration.file_name;
                 app.MicroscopeCalibrationDropDown.Value = app.MicroscopeCalibrationDropDown.Items{app.sl_data.calibration.cal_ix};
-                
+
                 [fig_handle] = center_image_with_preserved_aspect_ratio( ...
                     app.sl_data.image_file, ...
                     app.image_axis);
@@ -665,12 +693,6 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                     app.sl_data.live.sarcomere_length_fft = save_data.live.sarcomere_length_fft;
                     app.sl_data.live.sarcomere_length_acf = save_data.live.sarcomere_length_acf;
                     cm = parula(numel(app.sl_data.box_handle));
-                    hold(app.exp_axis,"on")
-                    for i = 1:numel(app.sl_data.box_handle)
-                        m = numel(app.sl_data.live.sarcomere_length_fft(:,i));
-                        plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_fft(1:m,i),'Color',cm(i,:),"Marker","pentagram",'LineWidth',2)
-                        plot(app.exp_axis,1:m,app.sl_data.live.sarcomere_length_acf(1:m,i),'Color',cm(i,:),"Marker","o",'LineWidth',2)
-                    end
                 end
             end
             function UpdateSL2(evt)
@@ -687,8 +709,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
         end
 
-        % Button pushed function: 
-        % LoadMicroscopeCalibrationFileButton
+        % Button pushed function: LoadMicroscopeCalibrationFileButton
         function LoadMicroscopeCalibrationFileButtonPushed(app, event)
             filterspec = {'*.xlsx;*.xls','All Excel Files'};
             [file_string,path_string] = uigetfile2(filterspec);
@@ -700,7 +721,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 app.sl_data.calibration.table = readtable(app.sl_data.calibration.file_name,'Sheet','Summary');
                 for i = 1 : size(app.sl_data.calibration.table,1)
                     name = sprintf('Obj. %s: %.4f um/px',app.sl_data.calibration.table.Objective{i}, app.sl_data.calibration.table.Calibration(i));
-                    app.MicroscopeCalibrationDropDown.Items{i} = name; 
+                    app.MicroscopeCalibrationDropDown.Items{i} = name;
                 end
                 app.sl_data.calibration.px_cal = app.sl_data.calibration.table.Calibration(1);
                 app.sl_data.calibration.cal_ix = 1;
@@ -734,17 +755,11 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
                 switch resolution
                     case '1024 x 822'
-                        nResolutionIndex = 1;
-                        width = 1024;
-                        height = 822;
+                        nResolutionIndex = 2;
                     case '2048 x 1644'
                         nResolutionIndex = 1;
-                        width = 2048;
-                        height = 1644;
                     case '4096 x 3288'
-                        nResolutionIndex = 1;
-                        width = 4096;
-                        height = 3288;
+                        nResolutionIndex = 0;
                 end
 
                 bStop = 0;
@@ -753,69 +768,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 index = strcmp(selected_device,items);
                 nSpeed = 1;
                 devList = app.Devices;
-                [im, ~, ~, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
-                app.ExposureSlider.Enable = 'off';
-                app.ExposureTimemsEditField.Enable = 'off';
-                app.ExposureTimemsEditFieldLabel.Enable = 'off';
-
-                app.ColorTempSlider.Enable = 'on';
-                app.ColorTempSlider.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
-                app.ColorTemperatureEditFieldLabel.Enable = 'on';
-                app.ColorTemperatureEditField.Enable = 'on';
-                app.ColorTemperatureEditField.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
-
-                app.TintSlider.Enable = 'on';
-                app.TintSlider.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
-                app.TintEditFieldLabel.Enable = 'on';
-                app.TintEditField.Enable = 'on';
-                app.TintEditField.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
-
-                app.WhiteBalanceButton.Enable = 'on';
-                app.WBDefaultsButton.Enable = 'on';
-
-                app.HueSlider.Enable = 'on';
-                app.HueSlider.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
-                app.HueEditField.Enable = 'on';
-                app.HueEditFieldLabel.Enable = 'on';
-                app.HueEditField.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
-
-                app.SaturationSlider.Enable = 'on';
-                app.SaturationSlider.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
-                app.SaturationEditField.Enable = 'on';
-                app.SaturationEditFieldLabel.Enable = 'on';
-                app.SaturationEditField.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
-
-                app.BrightnessSlider.Enable = 'on';
-                app.BrightnessSlider.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
-                app.BrightnessEditField.Enable = 'on';
-                app.BrightnessEditFieldLabel.Enable = 'on';
-                app.BrightnessEditField.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
-
-                app.ContrastSlider.Enable = 'on';
-                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
-                app.ContrastEditField.Enable = 'on';
-                app.ContrastEditFieldLabel.Enable = 'on';
-                app.ContrastEditField.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
-
-                app.GammaSlider.Enable = 'on';
-                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
-                app.GammaEditField.Enable = 'on';
-                app.GammaEditFieldLabel.Enable = 'on';
-                app.GammaEditField.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
-
-                app.DefaultsButton.Enable = 'on';
+                [im, width, height, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
+                CameraPanelControls(app,'on')
 
                 app.live_image = zeros(height,width, 3);
                 m = 1;
                 while ~isequal(bStop,2)
-                    for i = 1 : height
-                        for j = 1 :width
-                            app.live_image(i,j,1) = im(3*(j-1)+3,i);
-                            app.live_image(i,j,2) = im(3*(j-1)+2,i);
-                            app.live_image(i,j,3) = im(3*(j-1)+1,i);
-                        end
-                    end
-                    app.live_image = uint8(app.live_image);
+                    tic
+                    im_t = im';
+                    [k,n] = size(im_t);
+                    tic
+                    app.live_image(:,:,1)=im_t(:,3:3:n);
+                    app.live_image(:,:,2)=im_t(:,2:3:n);
+                    app.live_image(:,:,3)=im_t(:,1:3:n);
+                    app.live_image = rgb2gray(uint8(app.live_image));
                     if m == 1
                         [app.live_fig_handle] = center_image_with_preserved_aspect_ratio( ...
                             app.live_image, ...
@@ -830,8 +796,10 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                         cla(app.fft_axis)
                         cla(app.ac_axis)
                         SarcomereLength(app)
+                        UpdateTable(app);
                     end
                     drawnow;
+                    toc
                     if bStop==1
                         uiwait;
                     end
@@ -841,126 +809,9 @@ classdef SLMeasure_exported < matlab.apps.AppBase
                 bStop = 2;
                 app.live_measurement = 2;
                 mexToupcam(0,0);
-                app.boxes = app.sl_data.box_handle;
-                clear im;
-                app.LoadImageButton.Enable = 'on';
-                app.DeviceList.Enable = 'on';
-            end
-        end
-
-        % Value changed function: LiveExperimentModeButton
-        function LiveExperimentModeButtonValueChanged(app, event)
-            value = app.LiveExperimentModeButton.Value;
-            global bStop
-
-            if value
-
-                app.live_experiment = 1;
-                app.LoadImageButton.Enable = 'off';
-                selected_device = app.DeviceList.Value;
-
-                resolution = app.ResolutionDropDown.Value;
-
-                switch resolution
-                    case '1024 x 822'
-                        nResolutionIndex = 1;
-                        width = 1024;
-                        height = 822;
-                    case '2048 x 1644'
-                        nResolutionIndex = 1;
-                        width = 2048;
-                        height = 1644;
-                    case '4096 x 3288'
-                        nResolutionIndex = 1;
-                        width = 4096;
-                        height = 3288;
+                if isfield(app.sl_data,'box_handle')
+                    app.boxes = app.sl_data.box_handle;
                 end
-
-                bStop = 0;
-                app.DeviceList.Enable = 'off';
-                items = app.DeviceList.Items;
-                index = strcmp(selected_device,items);
-                nSpeed = 1;
-                devList = app.Devices;
-                [im, ~, ~, app.ToupcamData] = mexToupcam(nResolutionIndex, nSpeed, devList(index).id, index);
-                app.ExposureSlider.Enable = 'off';
-                app.ExposureTimemsEditField.Enable = 'off';
-                app.ExposureTimemsEditFieldLabel.Enable = 'off';
-
-                app.ColorTempSlider.Enable = 'on';
-                app.ColorTempSlider.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
-                app.ColorTemperatureEditFieldLabel.Enable = 'on';
-                app.ColorTemperatureEditField.Enable = 'on';
-                app.ColorTemperatureEditField.Value = app.ToupcamData.TOUPCAM_TEMP_DEF;
-
-                app.TintSlider.Enable = 'on';
-                app.TintSlider.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
-                app.TintEditFieldLabel.Enable = 'on';
-                app.TintEditField.Enable = 'on';
-                app.TintEditField.Value = app.ToupcamData.TOUPCAM_TINT_DEF;
-
-                app.WhiteBalanceButton.Enable = 'on';
-                app.WBDefaultsButton.Enable = 'on';
-
-                app.HueSlider.Enable = 'on';
-                app.HueSlider.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
-                app.HueEditField.Enable = 'on';
-                app.HueEditFieldLabel.Enable = 'on';
-                app.HueEditField.Value = app.ToupcamData.TOUPCAM_HUE_DEF;
-
-                app.SaturationSlider.Enable = 'on';
-                app.SaturationSlider.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
-                app.SaturationEditField.Enable = 'on';
-                app.SaturationEditFieldLabel.Enable = 'on';
-                app.SaturationEditField.Value = app.ToupcamData.TOUPCAM_SATURATION_DEF;
-
-                app.BrightnessSlider.Enable = 'on';
-                app.BrightnessSlider.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
-                app.BrightnessEditField.Enable = 'on';
-                app.BrightnessEditFieldLabel.Enable = 'on';
-                app.BrightnessEditField.Value = app.ToupcamData.TOUPCAM_BRIGHTNESS_DEF;
-
-                app.ContrastSlider.Enable = 'on';
-                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
-                app.ContrastEditField.Enable = 'on';
-                app.ContrastEditFieldLabel.Enable = 'on';
-                app.ContrastEditField.Value = app.ToupcamData.TOUPCAM_CONTRAST_DEF;
-
-                app.GammaSlider.Enable = 'on';
-                app.ContrastSlider.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
-                app.GammaEditField.Enable = 'on';
-                app.GammaEditFieldLabel.Enable = 'on';
-                app.GammaEditField.Value = app.ToupcamData.TOUPCAM_GAMMA_DEF;
-
-                app.DefaultsButton.Enable = 'on';
-
-                app.live_image = zeros(height,width, 3);
-                m = 1;
-                while ~isequal(bStop,2)
-                    for i = 1 : height
-                        for j = 1 :width
-                            app.live_image(i,j,1) = im(3*(j-1)+3,i);
-                            app.live_image(i,j,2) = im(3*(j-1)+2,i);
-                            app.live_image(i,j,3) = im(3*(j-1)+1,i);
-                        end
-                    end
-                    app.time(m) = datetime;
-                    app.live_image = uint8(app.live_image);
-                    app.live_fig_handle.CData = app.live_image;
-
-                    if (isfield(app.sl_data,'box_handle'))
-                        LiveSarcomereLength(app,m)
-                    end
-                    drawnow;
-                    if bStop==1
-                        uiwait;
-                    end
-                    m = m +1;
-                end
-            else
-                bStop = 2;
-                app.live_measurement = 2;
-                mexToupcam(0,0);
                 clear im;
                 app.LoadImageButton.Enable = 'on';
                 app.DeviceList.Enable = 'on';
@@ -1157,7 +1008,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
             % Create SLMeasureUIFigure and hide until all components are created
             app.SLMeasureUIFigure = uifigure('Visible', 'off');
-            app.SLMeasureUIFigure.Position = [100 100 1797 922];
+            app.SLMeasureUIFigure.Position = [100 100 1667 922];
             app.SLMeasureUIFigure.Name = 'SLMeasure';
             app.SLMeasureUIFigure.CloseRequestFcn = createCallbackFcn(app, @SLMeasureUIFigureCloseRequest, true);
 
@@ -1177,10 +1028,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.LoadMeasurementMenu.Separator = 'on';
             app.LoadMeasurementMenu.Text = 'Load Measurement';
 
+            % Create fft_axis
+            app.fft_axis = uiaxes(app.SLMeasureUIFigure);
+            title(app.fft_axis, 'FFT: Double-Sided Spectrum')
+            xlabel(app.fft_axis, 'Pixels^{-1}')
+            ylabel(app.fft_axis, 'Amplitude (A.U.)')
+            zlabel(app.fft_axis, 'Z')
+            app.fft_axis.Box = 'on';
+            app.fft_axis.Visible = 'off';
+            app.fft_axis.Position = [240 -356 526 313];
+
             % Create BrightfieldPanel
             app.BrightfieldPanel = uipanel(app.SLMeasureUIFigure);
             app.BrightfieldPanel.Title = 'Brightfield Panel';
-            app.BrightfieldPanel.Position = [219 425 1567 492];
+            app.BrightfieldPanel.Position = [219 415 1433 492];
 
             % Create image_axis
             app.image_axis = uiaxes(app.BrightfieldPanel);
@@ -1188,7 +1049,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.image_axis.XTick = [];
             app.image_axis.YTick = [];
             app.image_axis.Box = 'on';
-            app.image_axis.Position = [15 41 539 313];
+            app.image_axis.Position = [15 41 994 313];
 
             % Create inset_axis
             app.inset_axis = uiaxes(app.BrightfieldPanel);
@@ -1196,25 +1057,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.inset_axis.XTick = [];
             app.inset_axis.YTick = [];
             app.inset_axis.Box = 'on';
-            app.inset_axis.Position = [559 175 325 179];
-
-            % Create px_intensity
-            app.px_intensity = uiaxes(app.BrightfieldPanel);
-            title(app.px_intensity, 'Intensity Profiles')
-            xlabel(app.px_intensity, 'ROI Column')
-            ylabel(app.px_intensity, 'Optical Intensity (A.U)')
-            zlabel(app.px_intensity, 'Z')
-            app.px_intensity.Box = 'on';
-            app.px_intensity.Position = [889 41 325 313];
-
-            % Create calculation_axis
-            app.calculation_axis = uiaxes(app.BrightfieldPanel);
-            title(app.calculation_axis, 'Derivative of the Intensity Profile')
-            xlabel(app.calculation_axis, 'ROI Index')
-            ylabel(app.calculation_axis, 'd(profile)/dx')
-            zlabel(app.calculation_axis, 'Z')
-            app.calculation_axis.Box = 'on';
-            app.calculation_axis.Position = [1227 41 325 313];
+            app.inset_axis.Position = [1047 163 325 179];
 
             % Create LoadMicroscopeCalibrationFileButton
             app.LoadMicroscopeCalibrationFileButton = uibutton(app.BrightfieldPanel, 'push');
@@ -1235,32 +1078,32 @@ classdef SLMeasure_exported < matlab.apps.AppBase
 
             % Create ROIHeightpxEditFieldLabel
             app.ROIHeightpxEditFieldLabel = uilabel(app.BrightfieldPanel);
-            app.ROIHeightpxEditFieldLabel.Position = [625 141 89 22];
+            app.ROIHeightpxEditFieldLabel.Position = [1113 120 89 22];
             app.ROIHeightpxEditFieldLabel.Text = 'ROI Height (px)';
 
             % Create ROIHeightpxEditField
             app.ROIHeightpxEditField = uieditfield(app.BrightfieldPanel, 'numeric');
-            app.ROIHeightpxEditField.Position = [720 141 100 22];
+            app.ROIHeightpxEditField.Position = [1208 120 100 22];
 
             % Create ROIWidthpxEditFieldLabel
             app.ROIWidthpxEditFieldLabel = uilabel(app.BrightfieldPanel);
-            app.ROIWidthpxEditFieldLabel.Position = [625 101 85 22];
+            app.ROIWidthpxEditFieldLabel.Position = [1113 80 85 22];
             app.ROIWidthpxEditFieldLabel.Text = 'ROI Width (px)';
 
             % Create ROIWidthpxEditField
             app.ROIWidthpxEditField = uieditfield(app.BrightfieldPanel, 'numeric');
-            app.ROIWidthpxEditField.Position = [720 101 100 22];
+            app.ROIWidthpxEditField.Position = [1208 80 100 22];
 
             % Create ROIRowSelectSpinnerLabel
             app.ROIRowSelectSpinnerLabel = uilabel(app.BrightfieldPanel);
             app.ROIRowSelectSpinnerLabel.HorizontalAlignment = 'right';
-            app.ROIRowSelectSpinnerLabel.Position = [619 63 91 22];
+            app.ROIRowSelectSpinnerLabel.Position = [1107 42 91 22];
             app.ROIRowSelectSpinnerLabel.Text = 'ROI Row Select';
 
             % Create ROIRowSelectSpinner
             app.ROIRowSelectSpinner = uispinner(app.BrightfieldPanel);
             app.ROIRowSelectSpinner.ValueChangedFcn = createCallbackFcn(app, @ROIRowSelectSpinnerValueChanged, true);
-            app.ROIRowSelectSpinner.Position = [725 59 100 26];
+            app.ROIRowSelectSpinner.Position = [1213 38 100 26];
             app.ROIRowSelectSpinner.Value = 1;
 
             % Create LoadImageButton
@@ -1306,16 +1149,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             % Create SarcomereLengthCalculationPanel
             app.SarcomereLengthCalculationPanel = uipanel(app.SLMeasureUIFigure);
             app.SarcomereLengthCalculationPanel.Title = 'Sarcomere Length Calculation';
-            app.SarcomereLengthCalculationPanel.Position = [219 13 1567 390];
-
-            % Create fft_axis
-            app.fft_axis = uiaxes(app.SarcomereLengthCalculationPanel);
-            title(app.fft_axis, 'FFT: Double-Sided Spectrum')
-            xlabel(app.fft_axis, 'Pixels^{-1}')
-            ylabel(app.fft_axis, 'Amplitude (A.U.)')
-            zlabel(app.fft_axis, 'Z')
-            app.fft_axis.Box = 'on';
-            app.fft_axis.Position = [14 23 385 313];
+            app.SarcomereLengthCalculationPanel.Position = [219 13 1433 390];
 
             % Create ac_axis
             app.ac_axis = uiaxes(app.SarcomereLengthCalculationPanel);
@@ -1324,71 +1158,90 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             ylabel(app.ac_axis, 'Amplitude (A.U.)')
             zlabel(app.ac_axis, 'Z')
             app.ac_axis.Box = 'on';
-            app.ac_axis.Position = [424 23 385 313];
+            app.ac_axis.Position = [576 23 521 313];
 
-            % Create exp_axis
-            app.exp_axis = uiaxes(app.SarcomereLengthCalculationPanel);
-            title(app.exp_axis, 'Experiment')
-            xlabel(app.exp_axis, 'Frame')
-            ylabel(app.exp_axis, 'Sarcomere length (um)')
-            zlabel(app.exp_axis, 'Z')
-            app.exp_axis.Box = 'on';
-            app.exp_axis.Position = [1166 24 385 313];
+            % Create calculation_axis
+            app.calculation_axis = uiaxes(app.SarcomereLengthCalculationPanel);
+            title(app.calculation_axis, 'Derivative of the Intensity Profile')
+            xlabel(app.calculation_axis, 'ROI Index')
+            ylabel(app.calculation_axis, 'd(profile)/dx')
+            zlabel(app.calculation_axis, 'Z')
+            app.calculation_axis.Box = 'on';
+            app.calculation_axis.Position = [41 10 506 173];
+
+            % Create px_intensity
+            app.px_intensity = uiaxes(app.SarcomereLengthCalculationPanel);
+            title(app.px_intensity, 'Intensity Profiles')
+            xlabel(app.px_intensity, 'ROI Column')
+            ylabel(app.px_intensity, 'Optical Intensity (A.U)')
+            zlabel(app.px_intensity, 'Z')
+            app.px_intensity.Box = 'on';
+            app.px_intensity.Position = [41 195 506 173];
 
             % Create UITable
             app.UITable = uitable(app.SarcomereLengthCalculationPanel);
-            app.UITable.ColumnName = {'Box No'; 'FFT SL'; 'ACF SL'};
+            app.UITable.ColumnName = {'Box No'; 'ACF SL'};
             app.UITable.RowName = {};
-            app.UITable.Position = [848 54 280 271];
+            app.UITable.Position = [1129 57 280 271];
 
             % Create ExportSLTableButton
             app.ExportSLTableButton = uibutton(app.SarcomereLengthCalculationPanel, 'push');
             app.ExportSLTableButton.ButtonPushedFcn = createCallbackFcn(app, @ExportSLTableButtonPushed, true);
-            app.ExportSLTableButton.Position = [939 20 100 22];
+            app.ExportSLTableButton.Position = [1220 23 100 22];
             app.ExportSLTableButton.Text = 'Export SL Table';
 
             % Create CameraPanel
             app.CameraPanel = uipanel(app.SLMeasureUIFigure);
             app.CameraPanel.Title = 'Camera Panel';
-            app.CameraPanel.Position = [10 13 199 904];
+            app.CameraPanel.Position = [8 3 199 904];
 
             % Create DeviceListPanel
             app.DeviceListPanel = uipanel(app.CameraPanel);
             app.DeviceListPanel.Title = 'Choose Device';
             app.DeviceListPanel.Tag = 'uipanel_device';
             app.DeviceListPanel.FontSize = 13.3333333333333;
-            app.DeviceListPanel.Position = [11 730 178 146];
+            app.DeviceListPanel.Position = [11 732 178 146];
 
             % Create LiveMeasurementModeButton
             app.LiveMeasurementModeButton = uibutton(app.DeviceListPanel, 'state');
             app.LiveMeasurementModeButton.ValueChangedFcn = createCallbackFcn(app, @LiveMeasurementModeButtonValueChanged, true);
             app.LiveMeasurementModeButton.Text = 'Live Measurement Mode';
-            app.LiveMeasurementModeButton.Position = [16 35 148 22];
-
-            % Create LiveExperimentModeButton
-            app.LiveExperimentModeButton = uibutton(app.DeviceListPanel, 'state');
-            app.LiveExperimentModeButton.ValueChangedFcn = createCallbackFcn(app, @LiveExperimentModeButtonValueChanged, true);
-            app.LiveExperimentModeButton.Text = 'Live Experiment Mode';
-            app.LiveExperimentModeButton.Position = [16 6 148 22];
+            app.LiveMeasurementModeButton.Position = [13 21 148 22];
 
             % Create DeviceList
-            app.DeviceList = uilistbox(app.CameraPanel);
+            app.DeviceList = uilistbox(app.DeviceListPanel);
             app.DeviceList.Items = {};
             app.DeviceList.Tag = 'listbox_device';
             app.DeviceList.FontSize = 11;
-            app.DeviceList.Position = [20 795 160 51];
+            app.DeviceList.Position = [8 58 160 51];
             app.DeviceList.Value = {};
+
+            % Create ResolutionPanel
+            app.ResolutionPanel = uipanel(app.CameraPanel);
+            app.ResolutionPanel.Title = 'Resolution';
+            app.ResolutionPanel.Tag = 'uipanel_device';
+            app.ResolutionPanel.FontSize = 13.3333333333333;
+            app.ResolutionPanel.Position = [11 668 178 58];
+
+            % Create ResolutionDropDown
+            app.ResolutionDropDown = uidropdown(app.ResolutionPanel);
+            app.ResolutionDropDown.Items = {'4096 x 3288', '2048 x 1644', '1024 x 822'};
+            app.ResolutionDropDown.Enable = 'off';
+            app.ResolutionDropDown.Placeholder = 'Height x Width';
+            app.ResolutionDropDown.Position = [26 7 128 22];
+            app.ResolutionDropDown.Value = '1024 x 822';
 
             % Create SnapshotRecordPanel
             app.SnapshotRecordPanel = uipanel(app.CameraPanel);
             app.SnapshotRecordPanel.Title = 'Snapshot';
             app.SnapshotRecordPanel.Tag = 'uipanel_device';
             app.SnapshotRecordPanel.FontSize = 13.3333333333333;
-            app.SnapshotRecordPanel.Position = [11 604 178 58];
+            app.SnapshotRecordPanel.Position = [10 603 178 58];
 
             % Create SaveImageButton
             app.SaveImageButton = uibutton(app.SnapshotRecordPanel, 'push');
             app.SaveImageButton.ButtonPushedFcn = createCallbackFcn(app, @SaveImageButtonPushed, true);
+            app.SaveImageButton.Enable = 'off';
             app.SaveImageButton.Position = [39 7 100 22];
             app.SaveImageButton.Text = 'Save Image';
 
@@ -1397,11 +1250,12 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.ExposurePanel.Title = 'Exposure';
             app.ExposurePanel.Tag = 'uipanel_device';
             app.ExposurePanel.FontSize = 13.3333333333333;
-            app.ExposurePanel.Position = [11 489 178 110];
+            app.ExposurePanel.Position = [10 487 178 110];
 
             % Create AutoExposureCheckBox
             app.AutoExposureCheckBox = uicheckbox(app.ExposurePanel);
             app.AutoExposureCheckBox.ValueChangedFcn = createCallbackFcn(app, @AutoExposureCheckBoxValueChanged, true);
+            app.AutoExposureCheckBox.Enable = 'off';
             app.AutoExposureCheckBox.Text = 'Auto Exposure';
             app.AutoExposureCheckBox.Position = [9 64 101 22];
             app.AutoExposureCheckBox.Value = true;
@@ -1435,7 +1289,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.WhiteBalancePanel.Title = 'White Balance';
             app.WhiteBalancePanel.Tag = 'uipanel_device';
             app.WhiteBalancePanel.FontSize = 13.3333333333333;
-            app.WhiteBalancePanel.Position = [12 291 178 193];
+            app.WhiteBalancePanel.Position = [10 289 178 193];
 
             % Create ColorTemperatureEditFieldLabel
             app.ColorTemperatureEditFieldLabel = uilabel(app.WhiteBalancePanel);
@@ -1504,20 +1358,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.ColorAdjustmentPanel.Title = 'Color Adjustment';
             app.ColorAdjustmentPanel.Tag = 'uipanel_device';
             app.ColorAdjustmentPanel.FontSize = 13.3333333333333;
-            app.ColorAdjustmentPanel.Position = [11 8 178 277];
+            app.ColorAdjustmentPanel.Position = [11 8 178 270];
 
             % Create HueEditFieldLabel
             app.HueEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
             app.HueEditFieldLabel.HorizontalAlignment = 'right';
             app.HueEditFieldLabel.Enable = 'off';
-            app.HueEditFieldLabel.Position = [6 226 28 22];
+            app.HueEditFieldLabel.Position = [6 219 28 22];
             app.HueEditFieldLabel.Text = 'Hue';
 
             % Create HueEditField
             app.HueEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
             app.HueEditField.Editable = 'off';
             app.HueEditField.Enable = 'off';
-            app.HueEditField.Position = [116 226 57 22];
+            app.HueEditField.Position = [116 219 57 22];
 
             % Create HueSlider
             app.HueSlider = uislider(app.ColorAdjustmentPanel);
@@ -1527,7 +1381,7 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.HueSlider.ValueChangedFcn = createCallbackFcn(app, @HueSliderValueChanged, true);
             app.HueSlider.MinorTicks = [];
             app.HueSlider.Enable = 'off';
-            app.HueSlider.Position = [10 212 158 3];
+            app.HueSlider.Position = [10 205 158 3];
 
             % Create SaturationSlider
             app.SaturationSlider = uislider(app.ColorAdjustmentPanel);
@@ -1537,21 +1391,21 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.SaturationSlider.ValueChangedFcn = createCallbackFcn(app, @SaturationSliderValueChanged, true);
             app.SaturationSlider.MinorTicks = [];
             app.SaturationSlider.Enable = 'off';
-            app.SaturationSlider.Position = [13 170 158 3];
+            app.SaturationSlider.Position = [13 163 158 3];
             app.SaturationSlider.Value = 128;
 
             % Create SaturationEditFieldLabel
             app.SaturationEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
             app.SaturationEditFieldLabel.HorizontalAlignment = 'right';
             app.SaturationEditFieldLabel.Enable = 'off';
-            app.SaturationEditFieldLabel.Position = [6 184 60 22];
+            app.SaturationEditFieldLabel.Position = [6 177 60 22];
             app.SaturationEditFieldLabel.Text = 'Saturation';
 
             % Create SaturationEditField
             app.SaturationEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
             app.SaturationEditField.Editable = 'off';
             app.SaturationEditField.Enable = 'off';
-            app.SaturationEditField.Position = [116 184 57 22];
+            app.SaturationEditField.Position = [116 177 57 22];
 
             % Create BrightnessSlider
             app.BrightnessSlider = uislider(app.ColorAdjustmentPanel);
@@ -1561,20 +1415,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.BrightnessSlider.ValueChangedFcn = createCallbackFcn(app, @BrightnessSliderValueChanged, true);
             app.BrightnessSlider.MinorTicks = [];
             app.BrightnessSlider.Enable = 'off';
-            app.BrightnessSlider.Position = [11 128 158 3];
+            app.BrightnessSlider.Position = [11 121 158 3];
 
             % Create BrightnessEditFieldLabel
             app.BrightnessEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
             app.BrightnessEditFieldLabel.HorizontalAlignment = 'right';
             app.BrightnessEditFieldLabel.Enable = 'off';
-            app.BrightnessEditFieldLabel.Position = [6 142 62 22];
+            app.BrightnessEditFieldLabel.Position = [6 135 62 22];
             app.BrightnessEditFieldLabel.Text = 'Brightness';
 
             % Create BrightnessEditField
             app.BrightnessEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
             app.BrightnessEditField.Editable = 'off';
             app.BrightnessEditField.Enable = 'off';
-            app.BrightnessEditField.Position = [114 142 57 22];
+            app.BrightnessEditField.Position = [114 135 57 22];
 
             % Create ContrastSlider
             app.ContrastSlider = uislider(app.ColorAdjustmentPanel);
@@ -1584,20 +1438,20 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.ContrastSlider.ValueChangedFcn = createCallbackFcn(app, @ContrastSliderValueChanged, true);
             app.ContrastSlider.MinorTicks = [];
             app.ContrastSlider.Enable = 'off';
-            app.ContrastSlider.Position = [11 86 158 3];
+            app.ContrastSlider.Position = [11 79 158 3];
 
             % Create ContrastEditFieldLabel
             app.ContrastEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
             app.ContrastEditFieldLabel.HorizontalAlignment = 'right';
             app.ContrastEditFieldLabel.Enable = 'off';
-            app.ContrastEditFieldLabel.Position = [6 100 51 22];
+            app.ContrastEditFieldLabel.Position = [6 93 51 22];
             app.ContrastEditFieldLabel.Text = 'Contrast';
 
             % Create ContrastEditField
             app.ContrastEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
             app.ContrastEditField.Editable = 'off';
             app.ContrastEditField.Enable = 'off';
-            app.ContrastEditField.Position = [114 100 57 22];
+            app.ContrastEditField.Position = [114 93 57 22];
 
             % Create GammaSlider
             app.GammaSlider = uislider(app.ColorAdjustmentPanel);
@@ -1607,43 +1461,28 @@ classdef SLMeasure_exported < matlab.apps.AppBase
             app.GammaSlider.ValueChangedFcn = createCallbackFcn(app, @GammaSliderValueChanged, true);
             app.GammaSlider.MinorTicks = [];
             app.GammaSlider.Enable = 'off';
-            app.GammaSlider.Position = [11 44 158 3];
+            app.GammaSlider.Position = [11 37 158 3];
             app.GammaSlider.Value = 100;
 
             % Create GammaEditFieldLabel
             app.GammaEditFieldLabel = uilabel(app.ColorAdjustmentPanel);
             app.GammaEditFieldLabel.HorizontalAlignment = 'right';
             app.GammaEditFieldLabel.Enable = 'off';
-            app.GammaEditFieldLabel.Position = [9 58 48 22];
+            app.GammaEditFieldLabel.Position = [9 51 48 22];
             app.GammaEditFieldLabel.Text = 'Gamma';
 
             % Create GammaEditField
             app.GammaEditField = uieditfield(app.ColorAdjustmentPanel, 'numeric');
             app.GammaEditField.Editable = 'off';
             app.GammaEditField.Enable = 'off';
-            app.GammaEditField.Position = [114 58 57 22];
+            app.GammaEditField.Position = [114 51 57 22];
 
             % Create DefaultsButton
             app.DefaultsButton = uibutton(app.ColorAdjustmentPanel, 'push');
             app.DefaultsButton.ButtonPushedFcn = createCallbackFcn(app, @DefaultsButtonPushed, true);
             app.DefaultsButton.Enable = 'off';
-            app.DefaultsButton.Position = [39 8 100 22];
+            app.DefaultsButton.Position = [39 5 100 22];
             app.DefaultsButton.Text = 'Defaults';
-
-            % Create ResolutionPanel
-            app.ResolutionPanel = uipanel(app.CameraPanel);
-            app.ResolutionPanel.Title = 'Resolution';
-            app.ResolutionPanel.Tag = 'uipanel_device';
-            app.ResolutionPanel.FontSize = 13.3333333333333;
-            app.ResolutionPanel.Position = [11 668 178 58];
-
-            % Create ResolutionDropDown
-            app.ResolutionDropDown = uidropdown(app.ResolutionPanel);
-            app.ResolutionDropDown.Items = {'4096 x 3288', '2048 x 1644', '1024 x 822'};
-            app.ResolutionDropDown.Enable = 'off';
-            app.ResolutionDropDown.Placeholder = 'Height x Width';
-            app.ResolutionDropDown.Position = [26 7 128 22];
-            app.ResolutionDropDown.Value = '1024 x 822';
 
             % Show the figure after all components are created
             app.SLMeasureUIFigure.Visible = 'on';
